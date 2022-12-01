@@ -1,6 +1,9 @@
 package com.mdesign.data.api.controller;
 
 import com.mdesign.data.api.model.EventDateAtAddressInterface;
+import com.mdesign.data.api.model.GenderParticipationAtAddress;
+import com.mdesign.data.api.model.MDesignQueryResult;
+import com.mdesign.data.api.model.NbEventsParticipantsAtAddressInterface;
 import com.mdesign.data.api.service.QueryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -14,12 +17,34 @@ public class QueryController {
     @Autowired
     private QueryService queryService;
 
-    @GetMapping("/queries/event_date_at_address")
-    public ResponseEntity<Iterable<EventDateAtAddressInterface>> getAddresses(
+    @GetMapping("/queries/event_dates_at_address")
+    public ResponseEntity<Iterable<EventDateAtAddressInterface>> getEventDateAtAddress(
             @RequestParam String start,
             @RequestParam String end,
             @RequestParam String addressName) {
-        return new ResponseEntity<>(queryService.getEventDateAtAddress(start, end, addressName), HttpStatus.OK);
+        return new ResponseEntity<>(queryService.getEventDatesAtAddress(start, end, addressName), HttpStatus.OK);
 
+    }
+
+    @GetMapping("/queries/count_events_participation_by_address")
+    public ResponseEntity<Iterable<NbEventsParticipantsAtAddressInterface>> getNbEventsAndParticipantsByAddress(
+            @RequestParam String start,
+            @RequestParam String end) {
+        return new ResponseEntity<>(queryService.getNbEventsAndParticipantsByAddress(start, end), HttpStatus.OK);
+    }
+
+    @GetMapping("/queries/count_gender_participation_by_address")
+    public ResponseEntity<Iterable<GenderParticipationAtAddress>> getGenderParticipationByAddress(
+            @RequestParam String start,
+            @RequestParam String end,
+            @RequestParam String gender) {
+        return new ResponseEntity<>(queryService.getGenderParticipationByAddress(start, end, gender), HttpStatus.OK);
+    }
+
+    @GetMapping("/queries/mdesign")
+    public ResponseEntity<Iterable<MDesignQueryResult>> getMDesignResult(
+            @RequestParam String start,
+            @RequestParam String end) {
+        return new ResponseEntity<>(queryService.getMDesignQueryResults(start, end), HttpStatus.OK);
     }
 }
