@@ -20,7 +20,6 @@ public class PersonController {
     private PersonService personService;
 
     @GetMapping("/persons")
-    @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_ADMIN')")
     public ResponseEntity<Iterable<Person>> getPersons(@RequestParam(required = false) String name) {
         if (name != null)
             return new ResponseEntity<>(personService.getPersonByLastNameOrFirstNameContaining(name), HttpStatus.OK);
@@ -28,7 +27,6 @@ public class PersonController {
     }
 
     @GetMapping("/persons/{id}")
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
     public ResponseEntity<Person> getPerson(@PathVariable final Long id) {
         Optional<Person> optionalPerson = personService.getPerson(id);
         if (optionalPerson.isPresent()) return new ResponseEntity<>(optionalPerson.get(), HttpStatus.OK);
@@ -36,13 +34,11 @@ public class PersonController {
     }
 
     @PostMapping("/persons")
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
     public ResponseEntity<Person> savePerson(@RequestBody Person person) {
         return new ResponseEntity<>(personService.savePerson(person), HttpStatus.CREATED);
     }
 
     @PutMapping("/persons/{id}")
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
     public Person updatePerson(@RequestBody Person person, @PathVariable final Long id) {
         Optional<Person> optionalPerson = personService.getPerson(id);
         if (optionalPerson.isPresent()) {
@@ -77,7 +73,6 @@ public class PersonController {
     }
 
     @DeleteMapping("/persons/{id}")
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
     public ResponseEntity<?> deletePerson(@PathVariable final Long id) {
         personService.deletePerson(id);
         return ResponseEntity.noContent().build();

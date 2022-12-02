@@ -26,14 +26,12 @@ public class EventController {
     private PersonService personService;
 
     @GetMapping("/events")
-    @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_ADMIN')")
     public ResponseEntity<Iterable<Event>> getEvents(@RequestParam(required = false) String date) {
         if (date == null) return new ResponseEntity<>(eventService.getEvents(), HttpStatus.OK);
         else return new ResponseEntity<>(eventService.getEventsByDate(LocalDate.parse(date)), HttpStatus.OK);
     }
 
     @GetMapping("/events/{id}")
-    @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_ADMIN')")
     public ResponseEntity<Event> getEvent(@PathVariable final Long id) {
         Optional<Event> eventOption = eventService.getEvent(id);
         if (eventOption.isPresent()) return new ResponseEntity<>(eventOption.get(), HttpStatus.OK);
@@ -41,13 +39,11 @@ public class EventController {
     }
 
     @PostMapping("/events")
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
     public ResponseEntity<Event> saveEvent(@RequestBody Event event) {
         return new ResponseEntity<>(eventService.saveEvent(event), HttpStatus.CREATED);
     }
 
     @PutMapping("/events/{id}")
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
     public Event updateEvent(@RequestBody Event event, @PathVariable final Long id) {
         Optional<Event> optionalEvent = eventService.getEvent(id);
         if (optionalEvent.isPresent()) {
@@ -85,14 +81,12 @@ public class EventController {
     }
 
     @DeleteMapping("/events/{id}")
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
     public ResponseEntity<?> deleteEvent(@PathVariable final Long id) {
         eventService.deleteEvent(id);
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/events/{id}/participants")
-    @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_ADMIN')")
     public ResponseEntity<Event> addParticipant(@PathVariable final Long id, @RequestBody Person participant) {
         Optional<Event> optionalEvent = eventService.getEvent(id);
         if (optionalEvent.isPresent()) {
@@ -105,7 +99,6 @@ public class EventController {
     }
 
     @GetMapping("/events/{id}/participants")
-    @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_ADMIN')")
     public ResponseEntity<List<Person>> getParticipants(@PathVariable final Long id) {
         Optional<Event> optionalEvent = eventService.getEvent(id);
         if (optionalEvent.isPresent()) {
@@ -116,7 +109,6 @@ public class EventController {
     }
 
     @DeleteMapping("/events/{id}/participants/{person_id}")
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
     public ResponseEntity<?> getParticipants(@PathVariable final Long id, @PathVariable final Long person_id) {
         Optional<Event> optionalEvent = eventService.getEvent(id);
         if (optionalEvent.isPresent()) {
@@ -129,7 +121,6 @@ public class EventController {
     }
 
     @GetMapping("/events/{id}/hosts")
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
     public ResponseEntity<List<Person>> getHosts(@PathVariable final Long id) {
         Optional<Event> optionalEvent = eventService.getEvent(id);
         if (optionalEvent.isPresent()) {
@@ -140,7 +131,6 @@ public class EventController {
     }
 
     @PostMapping("/events/{id}/hosts")
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
     public ResponseEntity<Event> addHost(@PathVariable final Long id, @RequestBody Person host) {
         Optional<Event> optionalEvent = eventService.getEvent(id);
         if (optionalEvent.isPresent()) {
@@ -155,7 +145,6 @@ public class EventController {
 
 
     @DeleteMapping("/events/{id}/hosts/{person_id}")
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
     public ResponseEntity<?> getHost(@PathVariable final Long id, @PathVariable final Long person_id) {
         Optional<Event> optionalEvent = eventService.getEvent(id);
         if (optionalEvent.isPresent()) {

@@ -18,7 +18,6 @@ public class AddressController {
     private AddressService addressService;
 
     @GetMapping("/addresses")
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
     public ResponseEntity<Iterable<Address>> getAddresses(@RequestParam(required = false) AddressType type) {
         if (type == null) return new ResponseEntity<>(addressService.getAddresses(), HttpStatus.OK);
 
@@ -26,7 +25,6 @@ public class AddressController {
     }
 
     @GetMapping("/addresses/{id}")
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
     public ResponseEntity<Address> getAddress(@PathVariable final Long id) {
         Optional<Address> optionalAddress = addressService.getAddress(id);
         if (optionalAddress.isPresent()) return new ResponseEntity<>(optionalAddress.get(), HttpStatus.OK);
@@ -34,13 +32,11 @@ public class AddressController {
     }
 
     @PostMapping("/addresses")
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
     public ResponseEntity<Address> saveAddress(@RequestBody Address address) {
         return new ResponseEntity<>(addressService.saveAddress(address), HttpStatus.CREATED);
     }
 
     @PutMapping("/addresses/{id}")
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
     public ResponseEntity<Address> updateAddress(@RequestBody Address address, @PathVariable final Long id) {
         Optional<Address> optionalAddress = addressService.getAddress(id);
         if (optionalAddress.isPresent()) {
@@ -72,7 +68,6 @@ public class AddressController {
     }
 
     @DeleteMapping("/addresses/{id}")
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
     public ResponseEntity<?> deleteAddress(@PathVariable final Long id) {
         addressService.deleteAddress(id);
         return ResponseEntity.noContent().build();

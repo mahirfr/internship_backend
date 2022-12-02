@@ -19,7 +19,6 @@ public class QueryController {
     private QueryService queryService;
 
     @GetMapping("/queries/event_dates_at_address")
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
     public ResponseEntity<Iterable<EventDateAtAddressInterface>> getEventDateAtAddress(
             @RequestParam String start,
             @RequestParam String end,
@@ -29,7 +28,6 @@ public class QueryController {
     }
 
     @GetMapping("/queries/count_events_participation_by_address")
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
     public ResponseEntity<Iterable<NbEventsParticipantsAtAddressInterface>> getNbEventsAndParticipantsByAddress(
             @RequestParam String start,
             @RequestParam String end) {
@@ -37,7 +35,6 @@ public class QueryController {
     }
 
     @GetMapping("/queries/count_gender_participation_by_address")
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
     public ResponseEntity<Iterable<GenderParticipationAtAddress>> getGenderParticipationByAddress(
             @RequestParam String start,
             @RequestParam String end,
@@ -46,7 +43,6 @@ public class QueryController {
     }
 
     @GetMapping("/queries/mdesign")
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
     public ResponseEntity<Iterable<MDesignQueryResult>> getMDesignResult(
             @RequestParam String start,
             @RequestParam String end) {
