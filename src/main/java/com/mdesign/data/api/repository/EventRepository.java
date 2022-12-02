@@ -44,31 +44,46 @@ public interface EventRepository extends CrudRepository<Event, Long> {
     List<GenderParticipationAtAddress> getGenderParticipationByAddress(@Param("start") String start, @Param("end") String end, @Param("gender") String gender);
 
     @Query(value = """
-                   WITH sh AS (
-                       SELECT a.name as "address",
+                   WITH fr AS (
+                       SELECT a.id,
+                              a.name,
                               GROUP_CONCAT(DISTINCT (e.name)) as "events",
                               GROUP_CONCAT(DISTINCT (e.date)) as "dates",
                               COUNT(DISTINCT e.id) as "nbEvents",
                               SUM(e.sold_hours) as soldHours,
                               SUM(HOUR(TIMEDIFF(e.end_time, e.start_time)) + MINUTE(TIMEDIFF(e.end_time, e.start_time)) / 60) as "executedHours"
-                       FROM events e
-                                INNER JOIN addresses a on e.address_id = a.id
-                       GROUP BY a.name
+                                   FROM events e
+                                        INNER JOIN addresses a on e.address_id = a.id
+                                               WHERE e.date BETWEEN :start AND :end
+                                                   GROUP BY a.name
+                   ),
+                   sr AS (
+                       SELECT a.id,
+                              a.name,
+                              COUNT(DISTINCT (ep.participants_id)) as "nbParticipants",
+                              COUNT(DISTINCT (IF(gender = "HOMME", p.id, NULL))) "nbMen",
+                              COUNT(DISTINCT (IF(gender = "FEMME", p.id, NULL))) "nbWomen",
+                              TIMESTAMPDIFF(YEAR, MIN(p.date_of_birth), SYSDATE()) as "highestAge",
+                              TIMESTAMPDIFF(YEAR, MAX(p.date_of_birth), SYSDATE()) as lowestAge
+                                    FROM events e
+                                        INNER JOIN addresses a on e.address_id = a.id
+                                        INNER JOIN events_participants ep on e.id = ep.event_id
+                                        INNER JOIN persons p on ep.participants_id = p.id
+                                            WHERE e.date BETWEEN :start AND :end
+                                                GROUP BY a.name
                    )
                    
-                   SELECT sh.address, sh.events, sh.dates, sh.nbEvents, COUNT(DISTINCT (ep.participants_id)) as "nbParticipants",
-                          COUNT(DISTINCT (IF(gender = "HOMME", p.id, NULL))) "nbMen",
-                          COUNT(DISTINCT (IF(gender = "FEMME", p.id, NULL))) "nbWomen",
-                          TIMESTAMPDIFF(YEAR, MIN(p.date_of_birth), SYSDATE()) as "highestAge",
-                          TIMESTAMPDIFF(YEAR, MAX(p.date_of_birth), SYSDATE()) as lowestAge,
-                          sh.soldHours,
-                          sh.executedHours
-                               FROM sh, events e
-                                    INNER JOIN addresses a on e.address_id = a.id
-                                    INNER JOIN events_participants ep on e.id = ep.event_id
-                                    INNER JOIN persons p on ep.participants_id = p.id
-                                       WHERE e.date BETWEEN :start AND :end
-                                           GROUP BY sh.address;
+                   SELECT fr.name as address, fr.events, fr.dates, fr.nbEvents,
+                          sr.nbParticipants,
+                          sr.nbMen,
+                          sr.nbWomen,
+                          sr.highestAge,
+                          sr.lowestAge,
+                          fr.soldHours,
+                          fr.executedHours
+                               FROM fr
+                                   INNER JOIN sr on fr.id = sr.id
+                                       GROUP BY fr.name;
             """, nativeQuery = true)
     List<MDesignQueryResult> getMDesignQuery(@Param("start") String start, @Param("end") String end);
 }

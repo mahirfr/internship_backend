@@ -5,6 +5,7 @@ import com.mdesign.data.api.service.EventTypeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -16,11 +17,13 @@ public class EventTypeController {
     private EventTypeService eventTypeService;
 
     @GetMapping("/types")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
     public ResponseEntity<Iterable<EventType>> getEvents() {
         return new ResponseEntity<>(eventTypeService.getEventTypes(), HttpStatus.OK);
     }
 
     @GetMapping("/types/{id}")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
     public ResponseEntity<EventType> getEvent(@PathVariable final Long id) {
         Optional<EventType> eventTypeOption = eventTypeService.getEventType(id);
         if (eventTypeOption.isPresent()) return new ResponseEntity<>(eventTypeOption.get(), HttpStatus.OK);
@@ -28,11 +31,13 @@ public class EventTypeController {
     }
 
     @PostMapping("/types")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
     public ResponseEntity<EventType> saveEvent(@RequestBody EventType eventType) {
         return new ResponseEntity<>(eventTypeService.saveEventType(eventType), HttpStatus.CREATED);
     }
 
     @DeleteMapping("/types/{id}")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
     public ResponseEntity<?> deleteEventType(@PathVariable final Long id) {
         eventTypeService.deleteEventType(id);
         return ResponseEntity.noContent().build();
