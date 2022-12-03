@@ -29,4 +29,10 @@ public class EventTypeService {
     public EventType saveEventType(EventType eventType) {
         return eventTypeRepository.save(eventType);
     }
+
+    public boolean typeAlreadyExists(EventType eventType) {
+        String name = eventType.getName();
+        EventType existingType = eventTypeRepository.getEventTypeByName(name);
+        return existingType != null;
+    }
 }

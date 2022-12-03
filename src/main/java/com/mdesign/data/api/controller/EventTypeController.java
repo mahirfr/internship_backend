@@ -12,16 +12,19 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.Optional;
 
 @RestController
+@RequestMapping("/api")
 public class EventTypeController {
     @Autowired
     private EventTypeService eventTypeService;
 
     @GetMapping("/types")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Iterable<EventType>> getEvents() {
         return new ResponseEntity<>(eventTypeService.getEventTypes(), HttpStatus.OK);
     }
 
     @GetMapping("/types/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<EventType> getEvent(@PathVariable final Long id) {
         Optional<EventType> eventTypeOption = eventTypeService.getEventType(id);
         if (eventTypeOption.isPresent()) return new ResponseEntity<>(eventTypeOption.get(), HttpStatus.OK);
@@ -29,11 +32,13 @@ public class EventTypeController {
     }
 
     @PostMapping("/types")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<EventType> saveEvent(@RequestBody EventType eventType) {
         return new ResponseEntity<>(eventTypeService.saveEventType(eventType), HttpStatus.CREATED);
     }
 
     @DeleteMapping("/types/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> deleteEventType(@PathVariable final Long id) {
         eventTypeService.deleteEventType(id);
         return ResponseEntity.noContent().build();

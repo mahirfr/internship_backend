@@ -1,0 +1,11 @@
+package com.mdesign.data.api.repository;
+
+import com.mdesign.data.api.model.user.ERole;
+import com.mdesign.data.api.model.user.Role;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.Optional;
+
+public interface RoleRepository extends JpaRepository<Role, Long> {
+    Optional<Role> findByName(ERole name);
+}

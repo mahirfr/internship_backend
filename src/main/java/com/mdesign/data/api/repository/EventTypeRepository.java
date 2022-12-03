@@ -6,5 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface EventTypeRepository extends CrudRepository<EventType, Long> {
-
+    EventType getEventTypeByName(String name);
 }
