@@ -74,15 +74,15 @@ public interface EventRepository extends CrudRepository<Event, Long> {
                    )
                    
                    SELECT fr.name as address, fr.events, fr.dates, fr.nbEvents,
-                          sr.nbParticipants,
-                          sr.nbMen,
-                          sr.nbWomen,
-                          sr.highestAge,
-                          sr.lowestAge,
+                          COALESCE(sr.nbParticipants, 0) as nbParticipants,
+                          COALESCE(sr.nbMen, 0) as nbMen,
+                          COALESCE(sr.nbWomen, 0) as nbWomen,
+                          COALESCE(sr.highestAge, 0) as highestAge,
+                          COALESCE(sr.lowestAge, 0) as lowestAge,
                           fr.soldHours,
                           fr.executedHours
                                FROM fr
-                                   INNER JOIN sr on fr.id = sr.id
+                                   LEFT OUTER JOIN sr on fr.id = sr.id
                                        GROUP BY fr.name;
             """, nativeQuery = true)
     List<MDesignQueryResult> getMDesignQuery(@Param("start") String start, @Param("end") String end);

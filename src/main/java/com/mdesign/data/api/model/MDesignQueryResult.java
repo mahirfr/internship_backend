@@ -1,5 +1,7 @@
 package com.mdesign.data.api.model;
 
+import java.util.Optional;
+
 public interface MDesignQueryResult {
     String getAddress();
     String getEvents();

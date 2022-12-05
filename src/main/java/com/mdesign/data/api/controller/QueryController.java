@@ -45,6 +45,7 @@ public class QueryController {
     }
 
     @GetMapping("/queries/mdesign")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Iterable<MDesignQueryResult>> getMDesignResult(
             @RequestParam String start,
             @RequestParam String end) {
