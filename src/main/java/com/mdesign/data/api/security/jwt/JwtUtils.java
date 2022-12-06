@@ -4,17 +4,18 @@ import com.mdesign.data.api.security.services.UserDetailsImpl;
 import io.jsonwebtoken.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
-import java.io.Serializable;
 import java.util.Date;
 
 @Component
-public class JwtUtils implements Serializable {
+public class JwtUtils {
     private static final Logger logger = LoggerFactory.getLogger(JwtUtils.class);
 
-    private final String jwtSecret = System.getenv("SPRING_JWT_SECRET");
+    @Value("${com.mdesign.data.jwt}")
+    private String jwtSecret; /*= properties.getJwt();*/
 
     private final int jwtExpirationMs = 10 * 60 * 60 * 1000; // 10 hours in ms
 
