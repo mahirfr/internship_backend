@@ -45,8 +45,9 @@ public interface EventRepository extends CrudRepository<Event, Long> {
 
     @Query(value = """
                    WITH fr AS (
-                       SELECT a.id,
-                              a.name,
+                       SELECT et.id as id,
+                              et.name as type,
+                              GROUP_CONCAT(DISTINCT (a.name)) as "addresses",
                               GROUP_CONCAT(DISTINCT (e.name)) as "events",
                               GROUP_CONCAT(DISTINCT (e.date)) as "dates",
                               COUNT(DISTINCT e.id) as "nbEvents",
@@ -54,26 +55,27 @@ public interface EventRepository extends CrudRepository<Event, Long> {
                               SUM(HOUR(TIMEDIFF(e.end_time, e.start_time)) + MINUTE(TIMEDIFF(e.end_time, e.start_time)) / 60) as "executedHours"
                                    FROM events e
                                         INNER JOIN addresses a on e.address_id = a.id
+                                        INNER JOIN event_types et on e.type_id = et.id
                                                WHERE e.date BETWEEN :start AND :end
-                                                   GROUP BY a.name
+                                                   GROUP BY et.name
                    ),
                    sr AS (
-                       SELECT a.id,
-                              a.name,
+                       SELECT et.id,
                               COUNT(DISTINCT (ep.participants_id)) as "nbParticipants",
                               COUNT(DISTINCT (IF(gender = "HOMME", p.id, NULL))) "nbMen",
                               COUNT(DISTINCT (IF(gender = "FEMME", p.id, NULL))) "nbWomen",
                               TIMESTAMPDIFF(YEAR, MIN(p.date_of_birth), SYSDATE()) as "highestAge",
                               TIMESTAMPDIFF(YEAR, MAX(p.date_of_birth), SYSDATE()) as lowestAge
                                     FROM events e
+                                        INNER JOIN event_types et on e.type_id = et.id
                                         INNER JOIN addresses a on e.address_id = a.id
                                         INNER JOIN events_participants ep on e.id = ep.event_id
                                         INNER JOIN persons p on ep.participants_id = p.id
                                             WHERE e.date BETWEEN :start AND :end
-                                                GROUP BY a.name
+                                                GROUP BY et.id
                    )
                    
-                   SELECT fr.name as address, fr.events, fr.dates, fr.nbEvents,
+                   SELECT fr.type, fr.addresses, fr.events, fr.dates, fr.nbEvents,
                           COALESCE(sr.nbParticipants, 0) as nbParticipants,
                           COALESCE(sr.nbMen, 0) as nbMen,
                           COALESCE(sr.nbWomen, 0) as nbWomen,
@@ -83,7 +85,7 @@ public interface EventRepository extends CrudRepository<Event, Long> {
                           fr.executedHours
                                FROM fr
                                    LEFT OUTER JOIN sr on fr.id = sr.id
-                                       GROUP BY fr.name;
+                                       GROUP BY fr.type;
             """, nativeQuery = true)
     List<MDesignQueryResult> getMDesignQuery(@Param("start") String start, @Param("end") String end);
 }

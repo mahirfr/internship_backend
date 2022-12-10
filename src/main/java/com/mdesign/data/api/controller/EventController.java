@@ -92,6 +92,43 @@ public class EventController {
         return ResponseEntity.noContent().build();
     }
 
+    @PostMapping("/events/{id}/contacts")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Event> addContact(@PathVariable final Long id, @RequestBody Person contact) {
+        Optional<Event> optionalEvent = eventService.getEvent(id);
+        if (optionalEvent.isPresent()) {
+            Event currentEvent = optionalEvent.get();
+            personService.savePerson(contact);
+            currentEvent.addContact(contact);
+            return new ResponseEntity<Event>(eventService.saveEvent(currentEvent), HttpStatus.OK);
+
+        } else throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Could not find event with id " + id);
+    }
+
+    @GetMapping("/events/{id}/contacts")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<Person>> getContacts(@PathVariable final Long id) {
+        Optional<Event> optionalEvent = eventService.getEvent(id);
+        if (optionalEvent.isPresent()) {
+            Event currentEvent = optionalEvent.get();
+            return new ResponseEntity<>(currentEvent.getContacts(), HttpStatus.OK);
+
+        } else throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Could not find event with id " + id);
+    }
+
+    @DeleteMapping("/events/{id}/contacts/{person_id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> deleteContact(@PathVariable final Long id, @PathVariable final Long person_id) {
+        Optional<Event> optionalEvent = eventService.getEvent(id);
+        if (optionalEvent.isPresent()) {
+            Event currentEvent = optionalEvent.get();
+            currentEvent.deleteContact(person_id);
+            eventService.saveEvent(currentEvent);
+            return ResponseEntity.noContent().build();
+
+        } else throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Could not find event with id " + id);
+    }
+
     @PostMapping("/events/{id}/participants")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<Event> addParticipant(@PathVariable final Long id, @RequestBody Person participant) {
@@ -117,8 +154,8 @@ public class EventController {
     }
 
     @DeleteMapping("/events/{id}/participants/{person_id}")
-    @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<?> getParticipants(@PathVariable final Long id, @PathVariable final Long person_id) {
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> deleteParticipant(@PathVariable final Long id, @PathVariable final Long person_id) {
         Optional<Event> optionalEvent = eventService.getEvent(id);
         if (optionalEvent.isPresent()) {
             Event currentEvent = optionalEvent.get();
@@ -167,5 +204,4 @@ public class EventController {
 
         } else throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Could not find event with id " + id);
     }
-
 }

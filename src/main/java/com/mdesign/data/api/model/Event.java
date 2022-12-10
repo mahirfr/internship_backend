@@ -45,12 +45,36 @@ public class Event {
     private LocalTime endTime;
 
     @ManyToMany(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
+    private List<Person> contacts = new ArrayList<>();
+
+    @ManyToMany(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
     private List<Person> participants = new ArrayList<>();
 
     @ManyToMany(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
     private List<Person> hosts = new ArrayList<>();
 
     private String url;
+
+    public List<Person> getContacts() {
+        return this.contacts;
+    }
+
+    public void addContact(Person person) {
+        this.contacts.add(person);
+    }
+
+    public void deleteContact(final Long id) {
+        int indexToDelete = -1;
+        for (int i=0; i<contacts.size(); i++) {
+            if (contacts.get(i).getId().equals(id)) {
+                indexToDelete = i;
+            }
+        }
+        if (indexToDelete != -1) {
+            contacts.remove(indexToDelete);
+        }
+    }
+
     public List<Person> getParticipants() {
         return this.participants;
     }
