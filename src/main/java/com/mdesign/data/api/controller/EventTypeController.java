@@ -2,7 +2,6 @@ package com.mdesign.data.api.controller;
 
 import com.mdesign.data.api.model.EventType;
 import com.mdesign.data.api.service.EventTypeService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -15,8 +14,12 @@ import java.util.Optional;
 @RequestMapping("/api")
 @CrossOrigin(origins = "*")
 public class EventTypeController {
-    @Autowired
-    private EventTypeService eventTypeService;
+
+    private final EventTypeService eventTypeService;
+
+    public EventTypeController(EventTypeService eventTypeService) {
+        this.eventTypeService = eventTypeService;
+    }
 
     @GetMapping("/types")
     @PreAuthorize("hasRole('ADMIN')")

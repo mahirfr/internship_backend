@@ -5,7 +5,6 @@ import com.mdesign.data.api.model.GenderParticipationAtAddress;
 import com.mdesign.data.api.model.MDesignQueryResult;
 import com.mdesign.data.api.model.NbEventsParticipantsAtAddressInterface;
 import com.mdesign.data.api.service.QueryService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -17,8 +16,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api")
 public class QueryController {
-    @Autowired
-    private QueryService queryService;
+
+    private final QueryService queryService;
+
+    public QueryController(QueryService queryService) {
+        this.queryService = queryService;
+    }
 
     @GetMapping("/queries/event_dates_at_address")
     public ResponseEntity<Iterable<EventDateAtAddressInterface>> getEventDateAtAddress(

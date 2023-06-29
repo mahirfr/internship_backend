@@ -4,7 +4,6 @@ import com.mdesign.data.api.model.Address;
 import com.mdesign.data.api.model.Gender;
 import com.mdesign.data.api.model.Person;
 import com.mdesign.data.api.service.PersonService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -17,8 +16,12 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api")
 public class PersonController {
-    @Autowired
-    private PersonService personService;
+
+    private final PersonService personService;
+
+    public PersonController(PersonService personService) {
+        this.personService = personService;
+    }
 
     @GetMapping("/persons")
     @PreAuthorize("hasRole('USER')")

@@ -3,7 +3,6 @@ package com.mdesign.data.api.security.config;
 import com.mdesign.data.api.security.jwt.AuthEntryPointJwt;
 import com.mdesign.data.api.security.jwt.AuthTokenFilter;
 import com.mdesign.data.api.security.services.UserDetailsServiceImpl;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -25,16 +24,20 @@ import java.util.List;
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 @Configuration
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
+
     @Value("${com.mdesign.data.domain1}")
     private String domain1;
     @Value("${com.mdesign.data.domain2}")
     private String domain2;
 
-    @Autowired
-    private UserDetailsServiceImpl userDetailsService;
+    private final UserDetailsServiceImpl userDetailsService;
 
-    @Autowired
-    private AuthEntryPointJwt unauthorizedHandler;
+    private final AuthEntryPointJwt unauthorizedHandler;
+
+    public WebSecurityConfig(UserDetailsServiceImpl userDetailsService, AuthEntryPointJwt unauthorizedHandler) {
+        this.userDetailsService = userDetailsService;
+        this.unauthorizedHandler = unauthorizedHandler;
+    }
 
     public AuthTokenFilter authenticationJwtTokenFilter() {
         return new AuthTokenFilter();

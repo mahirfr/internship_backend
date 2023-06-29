@@ -3,7 +3,6 @@ package com.mdesign.data.api.controller;
 import com.mdesign.data.api.model.Address;
 import com.mdesign.data.api.model.AddressType;
 import com.mdesign.data.api.service.AddressService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -15,8 +14,11 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api")
 public class AddressController {
-    @Autowired
-    private AddressService addressService;
+    private final AddressService addressService;
+
+    public AddressController(AddressService addressService) {
+        this.addressService = addressService;
+    }
 
     @GetMapping("/addresses")
     @PreAuthorize("hasRole('ADMIN')")

@@ -13,8 +13,12 @@ import org.springframework.stereotype.Service;
 @Service
 public class QueryService {
 
-    @Autowired
-    private EventRepository eventRepository;
+
+    private final EventRepository eventRepository;
+
+    public QueryService(EventRepository eventRepository) {
+        this.eventRepository = eventRepository;
+    }
 
     public Iterable<EventDateAtAddressInterface> getEventDatesAtAddress(String start, String end, String addressName) {
         return eventRepository.getEventDatesAtAddress(start, end, addressName);

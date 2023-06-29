@@ -6,7 +6,6 @@ import com.mdesign.data.api.model.EventType;
 import com.mdesign.data.api.model.Person;
 import com.mdesign.data.api.service.EventService;
 import com.mdesign.data.api.service.PersonService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -21,10 +20,14 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api")
 public class EventController {
-    @Autowired
-    private EventService eventService;
-    @Autowired
-    private PersonService personService;
+
+    private final EventService eventService;
+    private final PersonService personService;
+
+    public EventController(EventService eventService, PersonService personService) {
+        this.eventService = eventService;
+        this.personService = personService;
+    }
 
     @GetMapping("/events")
     @PreAuthorize("hasRole('USER')")
