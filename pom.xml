@@ -13,6 +13,7 @@
     <version>0.0.1-SNAPSHOT</version>
     <name>api</name>
     <description>api</description>
+    <packaging>war</packaging>
     <properties>
         <java.version>17</java.version>
     </properties>
@@ -69,6 +70,43 @@
             <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
     </dependencies>
+    <profiles>
+        <profile>
+            <id>dev</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <skipUnitTests>false</skipUnitTests>
+                <db_host_address>localhost:3306</db_host_address>
+                <db_name>mdesign_queries</db_name>
+                <db_username>root</db_username>
+                <db_password></db_password>
+                <ddl>create</ddl>
+                <sql_filename>mdesign_queries</sql_filename>
+                <db_data_init>true</db_data_init>
+                <db_init_mode>always</db_init_mode>
+                <jwt_secret>kiki</jwt_secret>
+            </properties>
+        </profile>
+        <profile>
+            <id>prod</id>
+            <properties>
+                <skipUnitTests>true</skipUnitTests>
+<!--                TODO: create a docker compose image for mariadb-->
+                <db_host_address>mariadb:3306</db_host_address>
+                <db_name>mdesign_queries</db_name>
+<!--                TODO: create a settings.xml file on server-->
+                <db_username></db_username>
+                <db_password></db_password>
+                <ddl>none</ddl>
+                <sql_filename></sql_filename>
+                <db_data_init>false</db_data_init>
+                <db_init_mode>never</db_init_mode>
+                <jwt_secret></jwt_secret>
+            </properties>
+        </profile>
+    </profiles>
 
     <build>
         <plugins>
