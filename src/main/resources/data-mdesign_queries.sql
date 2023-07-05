@@ -17,30 +17,11 @@ SET time_zone = "+00:00";
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
 /*!40101 SET NAMES utf8mb4 */;
 
+
 --
 -- Base de données : `mdesign_queries`
 --
 
-DELIMITER $$
---
--- Procédures
---
-CREATE DEFINER=`web`@`%` PROCEDURE `SP_getParticipants` (IN `startDate` DATE, IN `endDate` DATE)   BEGIN
-    SELECT et.name as type, GROUP_CONCAT(DISTINCT events.name) as evenements,
-           events.date, p.last_name as nom, p.first_name as prenom,
-           TIMESTAMPDIFF(YEAR, MIN(p.date_of_birth), SYSDATE()) as age,
-           a.number as numero, a.street as rue, a.postal_code as code_postal, a.city as ville
-    FROM events
-             INNER JOIN event_types et on events.type_id = et.id
-             INNER JOIN events_participants ep on events.id = ep.event_id
-             INNER JOIN persons p on ep.participants_id = p.id
-             INNER JOIN addresses a on p.address_id = a.id
-    WHERE events.date BETWEEN startDate AND endDate
-    GROUP BY events.name, p.first_name, p.last_name
-    ORDER BY type, evenements, p.last_name, p.first_name;
-END$$
-
-DELIMITER ;
 
 -- --------------------------------------------------------
 
@@ -48,7 +29,7 @@ DELIMITER ;
 -- Structure de la table `addresses`
 --
 
-CREATE TABLE `addresses` (
+CREATE TABLE IF NOT EXISTS `addresses` (
   `id` bigint(20) NOT NULL,
   `city` varchar(255) NOT NULL,
   `name` varchar(255) DEFAULT NULL,
@@ -379,11 +360,351 @@ INSERT INTO `addresses` (`id`, `city`, `name`, `number`, `postal_code`, `street`
 
 -- --------------------------------------------------------
 
+
+--
+-- Structure de la table `persons`
+--
+
+CREATE TABLE IF NOT EXISTS `persons` (
+    `id` bigint(20) NOT NULL,
+    `date_of_birth` date NOT NULL,
+    `email` varchar(255) DEFAULT NULL,
+    `first_name` varchar(255) NOT NULL,
+    `gender` varchar(255) NOT NULL,
+    `last_name` varchar(255) NOT NULL,
+    `phone` varchar(255) DEFAULT NULL,
+    `address_id` bigint(20) DEFAULT NULL
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Déchargement des données de la table `persons`
+--
+
+INSERT INTO `persons` (`id`, `date_of_birth`, `email`, `first_name`, `gender`, `last_name`, `phone`, `address_id`) VALUES
+   (2, '1977-12-07', 'fawzikach@hotmail.com ', 'Kachouri', 'HOMME', 'Fawzi ', '0769913800', 28),
+   (6, '1985-12-07', 'Philippecarter@wanadoo.fr', 'Philippe ', 'HOMME', 'Hubert ', '0643734337', 32),
+   (7, '1993-12-01', 'milejeansy@gmail.com', 'Jean sylvestre', 'HOMME', 'ZOUANDA NDORO', '0758503040 ', 33),
+   (8, '1987-12-01', 'nadinelatif57@gmail.com', 'Nadine', 'FEMME', 'LATIF', '+33695613948', 34),
+   (10, '1992-12-01', 'Joaquim.ferreira899@orange.fr', 'Joaquim ', 'HOMME', 'Ferrerira', '0643860082', 36),
+   (17, '1980-02-27', 'fab57fr@hotmail.com', 'Fabrice', 'HOMME', 'GRUNEWALD', '0663041572', 45),
+   (18, '2022-12-10', 'antoine.criscitelli@orange.fr', 'Antoine', 'HOMME', 'CRISCITELLI', '0772322660', 46),
+   (19, '2022-11-12', 'j-c.cugnet@laposte.net', 'Jean-Claude', 'HOMME', 'CUGNET', '0628087578', 47),
+   (20, '2022-12-22', 'charhi.k@gmail.com', 'Charhi', 'HOMME', 'KAMAL', '0642463527', 48),
+   (21, '2022-12-14', 'k.men54@yahoo.fr', 'Kamen', 'HOMME', 'KEMMOUN', '0652035044', 49),
+   (22, '2022-12-14', 'on5at.thierry@gmail.com', 'Thierry', 'HOMME', 'GALERIN', '0032496987536', 50),
+   (23, '2022-12-21', 'dupont.jerome@gmai.com', 'Jerôme', 'HOMME', 'DUPONT ', '0682979470', 51),
+   (24, '2022-12-13', 'f4iuc@orang.fr', 'Mustapha', 'HOMME', 'BIUCHEMLA', '0683831550', 52),
+   (25, '2001-12-10', 'elias@hotmail.fr', 'Elias', 'HOMME', 'JONATHAN ', '0600000000', 53),
+   (26, '1987-05-11', 'leila@mjc-borny', 'Leilq', 'FEMME', 'SLIMANI', '0677648227', 54),
+   (27, '1981-01-16', 'nialnawel27@gmike.com', 'Nawel', 'FEMME', 'KHELIFA', '0784572304', 55),
+   (28, '1950-11-05', 'pierre.heiss@neuf.fr', 'Pierre', 'HOMME', 'HEISS', '0661579435', 56),
+   (29, '1955-04-28', 'odileulrich@live.fr', 'Marie Odile ', 'FEMME', 'ULRICH ', '0652848018', 57),
+   (30, '1958-05-11', 'pascale.gaudard57@gmail.com', 'Pascale', 'FEMME', 'GAUDARD', '0635491196', 58),
+   (32, '1950-07-21', 'stanislas.pelech@neuf.fr', 'Michele', 'FEMME', 'PELECH', 'O620434232', 60),
+   (33, '1953-12-11', 'cpfb57000@gmail.com', 'Catherine', 'FEMME', 'PERNET FRENTZEL', '0682377516', 61),
+   (34, '1984-12-22', 'virgile.frentzel@gmail.com', 'Virgile', 'HOMME', 'FRENTZEL', '0637682742', 62),
+   (36, '1950-12-29', 'isabelle.miredurand@gmail.com', 'Isabelle', 'FEMME', 'MIRE', '0671750848', 64),
+   (37, '2001-02-04', 'rochberthollet@gmail com', 'hcoR', 'HOMME', 'TELLOHTREB', '0627950512', 65),
+   (39, '1950-02-03', 'jacqueswirth@hotmail.com', 'Jacques', 'HOMME', 'WIRTH', '0652814987', 67),
+   (40, '1948-12-22', 'puissegur.jf@gmail.com', 'Yolande', 'FEMME', 'PUISSEGUR', '0664418094', 68),
+   (41, '1999-03-16', 'chretiennot.leopold@gmail.com', 'Léopold', 'HOMME', 'CHRÉTIENNOT', '0783671090', 69),
+   (42, '1993-11-06', 'cas.rigolot@gmail.com', 'Cassandra', 'FEMME', 'RIGOLOT', '0699293454', 70),
+   (43, '2002-01-11', 'aveevad7@gmail.com', 'Eva', 'FEMME', 'GUILBERT', '0627876343', 71),
+   (44, '1959-05-08', 'jean-pierre.goudot@orange.fr', 'Jean pierre', 'HOMME', 'GOUDOT', '0672326503', 72),
+   (45, '2010-03-09', 'aureproc57070@gmail.com', 'Lohane', 'FEMME', 'CACOILO', '0753120227', 73),
+   (46, '2010-11-26', 'rizuana.rexhepi@gmail.com', 'Rizuana', 'FEMME', 'REXHEPI', '0766472842', 74),
+   (51, '2004-12-21', 'antonypeltre5757@gmail.com', 'Antony', 'HOMME', 'PELTRE', '0783135030', 79),
+   (52, '2007-05-13', 'charpentier.melissa88@gmail.com', 'Mélissa', 'FEMME', 'CHARPENTIER', '0640 87 83 39', 80),
+   (53, '2010-04-20', 'charpentier.deborah8857@gmail.com', 'Deborah ', 'FEMME', 'CHARPENTIER ', '0786 94 40 80 ', 81),
+   (54, '1999-10-28', 'andymichalak.mdesign@gmail.com', 'Andy', 'HOMME', 'MICHALAK', '0638485096', 82),
+   (55, '2011-05-29', 'etmatekakese@gmail.com', 'Etmate', 'HOMME', 'KAKESE ', '0775216877', 83),
+   (56, '2010-03-13', 'sonia.chebah9@icloud.com', 'Sonia', 'FEMME', 'CHEBAH', '0749969882', 84),
+   (57, '2022-08-29', 'saraaafal@icloud.com', 'Sara', 'FEMME', 'FAL', '0636370952', 85),
+   (61, '2008-02-01', 'naelkachou@gmail.com', 'Nael', 'HOMME', 'KACHOURI ', '0651502920', 89),
+   (62, '2011-11-29', 'maiakach@gmail.com', 'Maïa', 'FEMME', 'KACHOURI ', '0610648418', 90),
+   (63, '2006-02-20', 'hanaaaldughaim5@gmail.com', 'Youssef ', 'HOMME', 'AL DUGHAIM', '0677300006', 91),
+   (64, '2008-01-01', 'www@gmail.com', 'Mohamed Nur ', 'HOMME', 'AL DUGHAIM ', '0606070809', 92),
+   (65, '2010-06-16', 'camillianfz26gmail.com', 'Camillia', 'FEMME', 'NEFZI', '0780277363', 93),
+   (66, '2015-12-10', 'dff@hotmail.com', 'Alea', 'FEMME', 'REXHEPI', '0781837997', 94),
+   (67, '2006-07-20', 'farsesfakeemail@gmail.com', 'Farès ', 'HOMME', 'DOUADI', '0620507997', 96),
+   (68, '1988-10-16', 'asma.baouendi@outlook.fr', 'Asma', 'FEMME', 'BAOUENDI', '0659589177', 97),
+   (69, '2011-05-09', 'lianamovsesyan1982@gmail.com', 'Hasmik', 'FEMME', 'MOVSESYAN', '0767267881', 98),
+   (70, '2011-01-16', 'henry92i@hotmail.com', 'Shamila', 'FEMME', 'RENAULT', '0661787114', 99),
+   (71, '2011-05-09', 'senaid.cirak@laposte.net', 'Naida', 'FEMME', 'CIRAK', '0758293827', 100),
+   (73, '2011-06-27', 'familles@contact-kairos.fr', 'Dario', 'HOMME', 'DI TULLIO', '0614284207', 102),
+   (74, '1953-08-03', 'asscuncao-joaquim@yahoo.fr', 'Maria', 'FEMME', 'ASSCUNCAO', '0663149340', 103),
+   (75, '1966-01-11', 'amelasma57@gmail.com', 'Amel', 'FEMME', 'BEN FRADJ', '0651427060', 104),
+   (76, '1975-04-28', 'fauxmail@fauxmail.com', 'Kadouja ', 'FEMME', 'OLMI', '0707080608', 105),
+   (77, '1954-07-23', 'patrickfournillon10@gmail.com', 'Patrick', 'HOMME', 'FOURNILLON', '0636151666', 106),
+   (78, '2004-10-06', 'fsteloy@gmail.com', 'Fares', 'HOMME', 'BENMEDDAH', '0646854373', 107),
+   (79, '2009-12-01', 'ziadrayane57@icloud.com', 'Rayane', 'HOMME', 'ZIAD', '0612823569', 108),
+   (80, '2009-09-04', 'lahyaoui.moussa@gmail.com', 'Moussa', 'HOMME', 'LAHYAOUI', '0666554580', 109),
+   (81, '2008-07-13', 'h.taharia@laposte.net', 'Farah', 'FEMME', 'TAHARIA', '0646652516', 110),
+   (82, '2023-01-08', 'nazimhedli57@icloud.com', 'Nazim', 'HOMME', 'HEDLI', '0782054077', 111),
+   (83, '2010-10-02', 'ineszaoud@gmail.com', 'Abdelkader', 'HOMME', 'BELKHEDIM', '0000000000000', 112),
+   (84, '2008-02-06', 'hhjjjjjjj@gmail.com', 'Tibyan', 'FEMME', 'YASSIR BUSHRA', '000000000000000', 113),
+   (85, '2011-08-14', 's@gmail.com', 'Serena', 'FEMME', 'BELKHEDIM', '060000000000', 114),
+   (86, '2008-10-01', 'm@yahoo.com', 'Mohamed', 'HOMME', 'BAH', '0749831707', 115),
+   (87, '2009-12-23', '00000', 'Meyssa', 'FEMME', 'YAHOUI', '000000', 116),
+   (88, '2009-10-20', 'jena573@icloud.com', 'Jena', 'FEMME', 'MSIRDI', '0782931374', 117),
+   (89, '2011-02-12', 'lyna.fellag@icloud.com', 'Lyna', 'FEMME', 'LEGRAND', '0769587411', 118),
+   (90, '2011-03-07', 'rahimikrame2@gmail.com', 'Ikrame', 'FEMME', 'RAHIM', '0782186244', 119),
+   (91, '2004-07-13', 'ines.zouiad@gmail.com', 'Ines', 'FEMME', 'ZOUAID', '0658444759', 120),
+   (92, '2005-02-08', 'kouicilydia@icloud.com', 'Lydia', 'FEMME', 'KOUICI', '0651144280', 121),
+   (93, '2005-12-16', 'leina.16@icloud.com', 'Leina ', 'FEMME', 'KARAOUET', '0695182451', 122),
+   (94, '2008-09-18', 'adembrahma@gmail.com', 'Adem', 'HOMME', 'YILDIRIM', '0629527333', 123),
+   (95, '2011-02-20', 'sidifyzi@gmail.com', 'Housni', 'HOMME', 'BENSAHLA', '0387 76 17 14 00', 124),
+   (96, '2010-07-05', 'abdoulcires2010@gmail.com', 'Abdoulaye', 'HOMME', 'SYLLA', '0753122373', 125),
+   (97, '2011-10-19', 'pas.de.mail', 'Nina', 'FEMME', 'LALLEMENT', 'Pasde téléphone ', 126),
+   (99, '2010-06-19', 'tnzk.57@gmail.com', 'Soufiane', 'HOMME', 'ZERYOUH', '00000000000', 128),
+   (100, '2009-10-10', 'mazari.wael@icloud.com', 'Wael', 'HOMME', 'MAZARI', '0749264830', 129),
+   (101, '2011-11-03', 'rayanbat.213@gmail.com', 'Rayane ', 'HOMME', 'BATOUCHE', '0750031878', 130),
+   (102, '2006-08-28', 'vvdanes3@gmail.com', 'Buchra', 'HOMME', 'YASSIR', '0773204882', 131),
+   (103, '2009-12-27', 'syrine.bslma57@gmail.com', 'Syrine', 'FEMME', 'BEN SLIMA', '0778075946', 132),
+   (104, '2009-04-28', 'inconnus', 'Yousra', 'FEMME', 'AMDA ', '0749406276', 133),
+   (105, '2009-09-15', 'inconnue', 'Luciano', 'HOMME', 'INCANNELLA', '0633613203', 134),
+   (106, '1970-01-01', 'pas de mail', 'Belkacem', 'HOMME', 'BEN CHABANE', '0683993118', 135),
+   (107, '1970-01-01', 'inconnu', 'Nordine', 'HOMME', 'BEN CHABANE', 'Inconnu', 136),
+   (118, '2000-01-01', 'degrandfidele@gmail.com', 'Fidèle ', 'HOMME', 'DEGRAND ', '123456789', 147),
+   (119, '2011-09-07', 'thalina.salimier@icloud.com', 'Thalina', 'FEMME', 'SALIMIER', '0612992676', 148),
+   (129, '2000-01-01', 'essai@gmail.com', 'Essai', 'HOMME', 'ESSAI ', '0908888888', 158),
+   (130, '2000-02-10', 'inconnu@essai.fr', 'Essai 2', 'HOMME', 'ESSAI 2', '0922222222', 159),
+   (132, '2007-02-11', 'louannsurawe@gmail.com', 'Lou-ann', 'FEMME', 'SURAWE', '0618650945', 161),
+   (133, '2007-04-22', 'shaunaweiss.23@icloud.com', 'Shauna', 'FEMME', 'JOLY WEISS', '0624792279', 162),
+   (134, '2007-01-13', 'guirfabio1301@gmail.com', 'Fabio', 'HOMME', 'GUIR', '0650804032', 163),
+   (135, '2007-04-18', 'clarisssabieth@gmail.com', 'Clarissa', 'FEMME', 'BIETH', '0767243336', 164),
+   (136, '2006-12-05', 'amylasapologue@gmail.com', 'Amy', 'FEMME', 'BAMBA', '0615389090', 165),
+   (137, '2005-10-27', 'elodiebouhl@gmail.com', 'Elodie', 'FEMME', 'BOUHL', '0623755489', 166),
+   (138, '2005-01-06', 'qleguen7@gmail.com', 'Quentin', 'HOMME', 'LE GUEN', '0629481345', 167),
+   (153, '2000-02-01', 'inconnug@essai.fr', 'Taski', 'HOMME', 'TESKI', '0778878899', 182),
+   (155, '2010-02-16', 'lyak1971@gmail.com', 'Sœur ', 'FEMME', 'PETITE ', '00009999900', 184),
+   (156, '1951-10-10', 'anravon@orange.fr', 'Claude', 'HOMME', 'RAVON ', '062444446043', 185),
+   (157, '1960-01-01', 'conrad.th@orange.fr', 'Thierry ', 'HOMME', 'CONRAD ', '0000000000', 186),
+   (159, '2009-04-10', 'mail@inconnu.com', 'David', 'HOMME', 'MARSAL', '9991939596', 188),
+   (165, '2010-05-12', 'lyak1971@gmail.com', 'Lycia', 'FEMME', 'AKEB', 'Inconnu', 194),
+   (166, '2010-06-11', 'inconnu', 'Sofiane', 'HOMME', 'KLECZEWSKI', 'Inconnu', 195),
+   (167, '2010-11-30', 'inconnu', 'Ilana', 'FEMME', 'SHULER', 'Inconnu', 196),
+   (168, '2010-10-27', 'inconnu', 'Elisa', 'FEMME', 'NERSESIJAN', 'Inconnu', 197),
+   (169, '2010-07-02', 'inconnu', 'Adam', 'HOMME', 'EL MZOURI', 'Inconnu', 198),
+   (170, '2011-07-05', 'inconnu', 'Diana', 'FEMME', 'NURISLAMOV', 'Inconnu', 199),
+   (172, '2009-04-09', 'inconnu', 'Harmony', 'HOMME', 'BOUHL', 'Inconnu', 201),
+   (173, '2009-07-23', 'inconnu', 'Ziad', 'HOMME', 'BENDEKKICHE', 'Inconnu', 202),
+   (174, '2009-06-09', 'inconnu', 'Acelya', 'FEMME', 'BRUNAUD', 'Inconnu', 203),
+   (175, '2009-12-31', 'durovicalmin25gmail.com', 'Almin', 'HOMME', 'DUROVIC', 'Inconnu', 204),
+   (176, '2009-04-26', 'inconnu', 'Younes', 'HOMME', 'MERIKHI', 'Inconnu', 205),
+   (177, '2010-01-01', 'inconnu', 'Tania', 'FEMME', 'AKEB', 'Inconnu', 206),
+   (178, '2010-01-01', 'inconnu', 'Amar', 'HOMME', 'KRSIC', 'Inconnu', 207),
+   (179, '2010-01-01', 'inconnu', 'Kendji', 'FEMME', 'VELER', 'Inconnu', 208),
+   (180, '2023-02-07', 'mylo57@hotmail.fr', 'Laurence', 'FEMME', 'STEFNER ', 'Inconnu', 209),
+   (181, '2023-02-07', 'malek57@live.fr', 'Zayia', 'FEMME', 'BOUADDAH', 'Inconnu', 210),
+   (182, '2023-02-07', 'hamzakouakoua@gmail.com', 'Hamza', 'HOMME', 'KOUAKOUA', 'Inconnu', 211),
+   (183, '2023-02-07', 'boufarha@riv54.fr', 'Farah', 'FEMME', 'BOUCEFAR', 'Inconnu', 212),
+   (184, '2023-02-07', 'inconnu', 'Lucas', 'HOMME', 'BOUCEFAR', 'Inconnu', 213),
+   (185, '2023-02-07', 'ademfergane@gmail.com', 'Djillali', 'HOMME', 'FERGANE', 'Inconnu', 214),
+   (186, '2023-02-07', 'f.awal85@laposte.net', 'Franck', 'HOMME', 'AWAL', 'Inconnu', 215),
+   (187, '2023-02-07', 'rumeysa0529@gmail.com', 'Rumeysa', 'FEMME', 'ANSLAN', 'Inconnu', 216),
+   (188, '2023-02-07', 'aysenurarslan57140@gmail.com', 'Ayse', 'FEMME', 'ARLAN', 'Inconnu', 217),
+   (189, '2023-02-07', 'inconnu', 'Marie louise', 'FEMME', 'DOS SANTOS', '0387305647', 218),
+   (190, '2023-02-07', 'inconnu', 'Nordine', 'HOMME', 'BEN CHABANE', 'Inconnu', 219),
+   (191, '2023-02-07', 'inconnu', 'Belkacem', 'HOMME', 'BEN CHABANE', '0683993118', 220),
+   (192, '2023-02-07', 'inconnu', 'Jennyfer', 'FEMME', 'NGORES ', 'Inconnu', 221),
+   (193, '2023-02-07', 'inconnu', 'Jennyfer', 'FEMME', 'NGOMES', 'Inconnu', 222),
+   (194, '2023-02-07', 'inconnu', 'Zohra', 'FEMME', 'NACHFEN', 'Inconnu', 223),
+   (195, '2023-02-07', 'inconnu', 'Chakila', 'FEMME', 'CHAKILA', 'Inconnu', 224),
+   (196, '2023-02-07', 'inconnu', 'Suzanne', 'FEMME', 'ARSLAN', 'Inconnu', 225),
+   (197, '2023-02-07', 'inconnu', 'fabrice', 'HOMME', 'WILLON ', 'Inconnu', 226),
+   (198, '2023-02-07', 'inconnu', 'Valerie', 'FEMME', 'WILLON', 'Inconnu', 227),
+   (199, '1980-09-27', 'gaetan.roelens@gmail.com', 'Gaetan', 'HOMME', 'ROELENS', '0667985414', 228),
+   (200, '2015-07-25', 'inconnu', 'Flora', 'FEMME', 'ROELENS', 'Inconnu', 229),
+   (201, '2008-10-31', 'inconnu', 'Roelens', 'FEMME', 'ZIA', 'Inconnu', 230),
+   (202, '2008-08-18', 'raoulvanvlemmeren@gmail.com', 'Raoul', 'HOMME', 'VAN VLEMMEREN', '0685756718', 231),
+   (203, '2007-04-26', 'kyllianpoullain723@gmail.com', 'Kyllian', 'HOMME', 'POULLAIN', '0382596610', 232),
+   (204, '1988-02-10', 'fajo.educateurs@gmail.com', 'Will', 'HOMME', 'WILL', '0382596610', 233),
+   (205, '2008-08-24', 'fajo.educateurs@gmail.com', 'Kylian', 'HOMME', 'ROCH', '0382596610', 234),
+   (206, '1998-01-20', 'jeancelina.m@outlook.fr', 'Jeancelina', 'FEMME', 'MIGUEL', '0783899896', 235),
+   (207, '2009-06-22', 'inconnu', 'Salim', 'HOMME', 'NORALGALIL', 'Inconnu', 236),
+   (208, '2005-05-25', 'inconnu', 'Nolan', 'HOMME', 'TINTINGER', 'Inconnu', 237),
+   (209, '1973-01-01', 'inconnu', 'Frédéric ', 'FEMME', 'SHNUR', '+336 75 25 64 66', 238),
+   (210, '1977-01-27', 'marxjul@gmail.com', 'Julien ', 'HOMME', 'MARX', '0678762718', 239),
+   (211, '1987-01-01', 'inconnu', 'Nicolas ', 'HOMME', 'AMBRY', '+336 81 20 52 03', 240),
+   (212, '2010-03-01', 'inconnu', 'HISHAM', 'HOMME', 'TAWIL', 'Inconnu', 241),
+   (213, '2011-07-16', 'inconnu', 'Moustafa', 'HOMME', 'TABET', '0787422137', 242),
+   (214, '2011-03-10', 'inconnu', 'Alicia', 'FEMME', 'MYGARDON FAORO ', '0679088841', 243),
+   (215, '2010-01-01', 'inconnu', 'Kaila', 'FEMME', 'LAMOR', '0000000000000000', 244),
+   (216, '2010-01-01', 'inconnu', 'Adam', 'HOMME', 'SEDDIKI', '0000000000', 245),
+   (217, '2006-01-01', 'inconnu', 'Nessim', 'HOMME', 'ARROUS', '0000000000', 246),
+   (218, '2007-01-01', 'inconnu', 'Khaled', 'HOMME', 'ADDA', '0000000000', 247),
+   (219, '2006-01-01', 'inconnu', 'Rayan', 'HOMME', 'GNOUL', '00000000000000000', 248),
+   (220, '1956-12-27', 'danieljonvaux@live.fr', 'DANIEL', 'HOMME', 'JONVAUX', '0652848018', 249),
+   (221, '1959-05-24', 'marie6.saccol@gmail.com', 'Marie', 'FEMME', 'SACCOL', '0681382548', 250),
+   (222, '2023-03-14', 'jardin1130@gmail.com', 'Danielle', 'FEMME', 'LARRIERE', '0686592805', 251),
+   (223, '1953-12-11', 'cpfb57000@gmail.com', 'Catherine', 'FEMME', 'PERNET', '0682377516', 252),
+   (224, '1950-02-05', 'inconnu', 'Belkacem', 'HOMME', 'BENCHABANE', '0683993118', 253),
+   (225, '1954-12-25', 'njm57.castagnetto@gmail.com', 'Noelle', 'FEMME', 'CASTAGNETTO', '0623502476', 254),
+   (226, '1954-12-07', 'haliltahar437@gmail.com', 'Tahar', 'HOMME', 'HALIL', '0782434130', 255),
+   (227, '1965-11-11', 'aubertgilles56@gmail.com', 'GILLES', 'HOMME', 'AUBERT', '0651892496', 256),
+   (228, '1958-06-06', 'm.tornicelli@wanadoo.fr', 'Maurice', 'HOMME', 'TORNICELLI', '0633515443', 257),
+   (229, '1966-04-25', 'm-p.brisse@orange.fr', 'Marie Pierre', 'FEMME', 'BRISSE', '0668662799', 258),
+   (230, '1966-05-22', 'dambrine@free.fr', 'MARIE ODILE', 'FEMME', 'DAMBRINE', '0646464784', 259),
+   (231, '1969-06-04', 'frederic.chudeau@gmail.com', 'Frederic', 'HOMME', 'CHUDEAU', '0652101959', 260),
+   (232, '2023-03-02', 'mickael.meri@neuf.fr', 'Mickael', 'HOMME', 'MERI', '0602233531', 261),
+   (233, '2007-02-27', 'inconnu', 'VASVIÉ', 'FEMME', 'IBRAHIMI', '0699732728', 262),
+   (234, '2001-04-14', 'fabien.mdesign.com', 'Fabien', 'HOMME', 'ARIANO', '0688561427', 263),
+   (235, '1945-07-23', 'anravon@orange.fr', 'Andre', 'HOMME', 'RAVON', '0614259098', 264),
+   (236, '1981-03-16', 'babz57000@gmail.com', 'Nabil', 'HOMME', 'GUYLIZ', '0623502476', 265),
+   (237, '1975-12-21', 'florence.ligouzat@orange.fr', 'Florence', 'FEMME', 'LIGOUZAT', '0662453428', 266),
+   (238, '2006-05-03', 'aurelien.hoffmann57@gmail.com', 'Aurélien', 'HOMME', 'HOFFMANN', '0633821821', 267),
+   (239, '2012-07-18', 'inconnu', 'Louise', 'HOMME', 'VIVARELLI ', 'Inconnu', 268),
+   (240, '2013-03-19', 'inconnu', 'Mathieu ', 'HOMME', 'GRUN', 'Inconnu', 269),
+   (241, '2009-04-17', 'fajo.educateurs@gmail.com', 'Cristiano', 'HOMME', 'MARCINIAK', '0382596610', 270),
+   (242, '2007-06-25', 'fajo.educateurs@gmail.com', 'Julien', 'HOMME', 'MARTZ', '0382596610', 271),
+   (243, '2001-04-17', 'adrienpeltre28@gmail.com', 'Adrien', 'HOMME', 'PELTRE ', '0614549035', 272),
+   (244, '1999-06-11', 'kimberleylagal99@gmail.com', 'Kimberley', 'FEMME', 'LAGAL', 'Inconnu', 273),
+   (245, '2011-11-06', 'noellyarnould642@gmail.com', 'NOELLY', 'FEMME', 'ARNOULD', '0753820655', 274),
+   (246, '2023-10-19', 'sonia.chebah@gmail.com', 'Sirine', 'FEMME', 'CHEBAH', '0605729169', 275),
+   (247, '2010-05-25', 'inconnu', 'Emma', 'FEMME', 'GEHL', 'Inconnu', 276),
+   (248, '2011-05-06', 'inconnu', 'Lea', 'FEMME', 'HARTNAGEL', 'Inconnu', 277),
+   (249, '2008-04-17', 'crosswegan@gmail.com', 'Samy', 'HOMME', 'BENAISSA', '+337 50 70 73 76', 278),
+   (250, '2009-01-25', 'benamarnoureddine0@gmail.com', 'Zakaria', 'HOMME', 'BENAMAR', 'Inconnu', 279),
+   (251, '2014-03-07', 'inconnu', 'Nelya', 'FEMME', 'BOUZIDI', '0768015351', 280),
+   (252, '2010-05-12', 'inconnu', 'Tania', 'FEMME', 'AKEB', '0603394161', 281),
+   (253, '1947-07-09', 'papyjeff2384@gmail.com', 'Jean Françoiss', 'HOMME', 'PUISSEGUR', '0664418094', 282),
+   (254, '1983-09-28', 'sindyfahmyhanna@yahoo.fr', 'Sindy', 'FEMME', 'FAHMY HANNA ', '0618741263', 283),
+   (255, '1956-04-14', 'astridlozach@me.com', 'Astrid', 'FEMME', 'LOZACH', '0610162202', 284),
+   (256, '1947-01-20', 'fbboussedira@gmail.com', 'Ferhat', 'HOMME', 'BOUSSEDIRA', '0666576210', 285),
+   (257, '1961-02-18', 'dominique.jobard57@gmail.com', 'Dominique', 'HOMME', 'JOBARD', '0688714530', 286),
+   (258, '1952-12-08', 'edefeyter57@gmail.com', 'Etienne', 'HOMME', 'DE FEYTER', '0672069147', 287),
+   (259, '1976-02-03', 'malek57@live.fr', 'ZAYIA', 'FEMME', 'BOUHADDA', '0766236293', 288),
+   (260, '1966-01-18', 'nourikh@hotmail.fr', 'Kheira', 'FEMME', 'NOURI', '0624342704', 289),
+   (261, '1973-03-28', 'eliz73feuga@gmail.com', 'elizabeth', 'FEMME', 'FEUGA', '0769904823', 290),
+   (262, '2000-01-01', 'remy.paquet@orange.fr', 'Remy', 'HOMME', 'PAQUET', 'inconnu', 291),
+   (263, '2000-01-01', 'chouikhahejer@yahoo.fr', 'Hejer', 'FEMME', 'CHOUIKHA', '000000000', 292),
+   (264, '2000-01-01', 'inconnu', 'Abdellah', 'HOMME', 'BOUKEDIL', '000000000', 293),
+   (265, '2000-01-01', 'kayla.steel.folliot@gmail.com', 'Steel', 'FEMME', 'KAYLA FOLLIOT', '00000000', 294),
+   (266, '2000-01-01', 'verolaufer@gmail.com', 'Veronique', 'FEMME', 'LAUFER', '0000000000', 295),
+   (267, '1976-06-20', 'inconnu', 'Vincent', 'HOMME', 'MARCHETTI', '0675100062', 296),
+   (268, '2007-10-28', 'rmanguan@gmail.com', 'Raychi Bless', 'HOMME', 'MANGUANA', '0766 73 10 64', 297),
+   (269, '2011-06-16', 'tulelamanguana@gmail.com', 'Joychi Tulela', 'FEMME', 'MANGUANA', '00000', 298),
+   (270, '2012-04-01', 'inconnu', 'Adèle', 'FEMME', 'METZINGER', 'Inconnu', 299),
+   (271, '2012-03-31', 'inconnu', 'Louis', 'HOMME', 'SIX', 'Inconnu', 300),
+   (272, '2010-08-01', 'inconnu', 'Nour', 'FEMME', 'TEKKOUK', '0766102407', 301),
+   (273, '2013-12-26', 'inconnu', 'Basile', 'HOMME', 'SORE', 'Inconnu', 302),
+   (274, '2012-01-17', 'elina.massenet@gmail.com', 'Elina', 'FEMME', 'MASSENET', 'Inconnu', 303),
+   (275, '2005-04-01', 'rayanghoul11@gmail.com', 'Rayan', 'HOMME', 'GHOUL', '0668565068', 304),
+   (276, '2009-08-26', 'rayanaguachour66@gmail.com', 'Rayan', 'HOMME', 'AGUACHOUR', '0744185104', 305),
+   (277, '2005-03-30', 'anasmoghni@gmail.com', 'Anas', 'HOMME', 'ALLOU', '0783897946', 306),
+   (278, '2006-11-16', 'salimjoestar@gmail.com', 'Salim', 'HOMME', 'TIOUTI', '0658690422', 307),
+   (279, '2005-09-20', 'jonathanmbuku198@gmail.com', 'Jonathan', 'HOMME', 'MBUKU', '0644733947', 308),
+   (280, '2009-05-30', 'khordjmellina@icloud.com', 'Mellina', 'FEMME', 'KHORDJ', '0623502476', 309),
+   (281, '2006-03-04', 'lamisse029@gmail.com', 'Lamisse', 'FEMME', 'AROUCI', '0602416461', 310),
+   (282, '2007-11-22', 'yamsss84@gmail.com', 'Yamina', 'FEMME', 'BELARBI ', '0784.62.85.77', 311),
+   (283, '2011-01-29', 'inconnu', 'LOUANE', 'FEMME', 'FRANÇOIS', '0678078650', 312),
+   (284, '2000-01-01', 'inconnu', 'Claudine', 'FEMME', 'WAGNER', '0000000000', 313),
+   (285, '2000-01-01', 'inconnu', 'Benjamin', 'HOMME', 'BONERE ', '00000000000', 314),
+   (286, '2000-01-01', 'michel.mercier@425orange.fr', 'Michel', 'FEMME', 'MERCIER', '0000000000', 315),
+   (287, '2000-01-01', 'inconnu', 'Josiane', 'FEMME', 'TAESCH', '000000000', 316),
+   (288, '2000-01-01', 'inconnu', 'Dominique', 'HOMME', 'DOTTOR', '00000000000', 317),
+   (289, '2000-01-01', 'jean.grayo@modulonet.fr', 'jean', 'HOMME', 'GRAYO', '0777910858', 318),
+   (290, '2000-01-01', 'inconnu', 'Claire', 'FEMME', 'GREBIL', '00000000000', 319),
+   (291, '2000-01-01', 'georgeslapeyre@yahoo.fr', 'Georges', 'HOMME', 'LAPEYRE', '0387581910', 320),
+   (292, '2000-01-01', 'rockberthollet@gmail.com', ' Rock', 'HOMME', 'BERTHOLLET', '0627950512', 321),
+   (293, '2000-01-01', 'inconnu', '(amie de jean)', 'FEMME', 'ANDRÉE (AMIE DE JEAN)', '0387517832', 322),
+   (294, '2000-01-01', 'inconnu', 'Franck', 'HOMME', 'ARNAL', '0000000000', 323),
+   (295, '2000-01-01', 'inconnu', 'Jean Marie', 'HOMME', 'MIRE', '0000000000', 324),
+   (296, '2000-01-01', 'inconnu', 'Jean Claude', 'HOMME', 'AUER', '000000000', 325),
+   (297, '2000-01-01', 'judith.henrion@gmail.com', 'Judith', 'FEMME', 'HENRION', '000000000', 326),
+   (298, '2000-01-01', 'inconnu', 'Morgane', 'FEMME', 'ARTOIS', '0674914683', 327),
+   (299, '2000-01-01', 'inconnu', 'Monique', 'FEMME', 'THUILLER', '0649856030', 328),
+   (300, '2000-01-01', 'jose.napoli@gmail.com', 'Joseph', 'HOMME', 'NAPOLI', '0669439099', 329),
+   (301, '2000-01-01', 'inconnu', 'Fabienne', 'FEMME', 'BREIT', '0000000000', 330),
+   (302, '2000-01-01', 'inconnu', 'Daniel', 'HOMME', 'BOUSSEDIRA', '0000000000', 331),
+   (303, '2000-01-01', 'jacqueswirth@hotmail.com', 'Jacques', 'HOMME', 'WIRTH ', '0000000000', 332),
+   (304, '2000-01-01', 'a.arendt@hotmail.fr', 'Annick', 'FEMME', 'ARENDT ', '0000000000', 333),
+   (305, '2000-01-01', 'inconnu', 'Hamid', 'HOMME', 'OULMI', '000000000', 334),
+   (306, '2000-01-01', 'inconnu', 'Pascale', 'FEMME', 'GODARD', '0000000000', 335),
+   (307, '2000-01-01', 'michele.rousselot@orange.fr', 'Michele ', 'FEMME', 'ROUSSELOT', '0387631677', 336),
+   (308, '2000-01-01', 'juliegey64@gmail.com', 'Julie', 'FEMME', 'GEY', '0000000000', 337),
+   (309, '2000-01-01', 'inconnu', 'KADUOUDJA', 'FEMME', 'OULMI', '0000000000', 338),
+   (310, '2000-01-01', 'abdelazizwac@hotmail.fr', 'abdelaziz', 'HOMME', 'KHALDOUNE', '0000000000', 339),
+   (311, '2000-01-01', 'chouikanarjes@yahoo.fr', 'Abdelkader', 'HOMME', 'CHOUIKA', '0000000000', 340),
+   (312, '2000-01-01', 'louvre.malroute@gmail.com', 'Louvre', 'FEMME', 'MALROUTE', '0000000000', 341),
+   (313, '2000-01-01', 'clodriant@hotmail.com', 'Claudine', 'FEMME', 'DRIANT', '000000000', 342),
+   (314, '2000-01-01', 'chouetteages57@yahoo.fr', 'Agès', 'FEMME', 'PERREN', '0661159489', 343),
+   (315, '2000-01-01', 'inconnu', 'Albant', 'HOMME', 'GREGOLF', '0000000000', 344),
+   (316, '2000-01-01', 'inconnu', 'LASZ', 'FEMME', 'NMOMA', '0000000000', 345),
+   (317, '2000-01-01', 'myriam.alliot@numericable.fr', 'Myriam', 'FEMME', 'ALLIOT', '0000000000', 346),
+   (318, '2000-01-01', 'hongtg@hotmail.com', 'Hong', 'HOMME', 'TANG ', '0770119094', 347),
+   (319, '2022-01-01', 'cosmos.rose@hotmail.fr', ' Andrée ', 'FEMME', 'HOCQUEL', '0387517832', 348),
+   (320, '2007-04-11', 'meryem.k5740@gmail.com', 'Meryem', 'FEMME', 'KOMBE', '0783963371', 349),
+   (321, '2007-01-17', 'inconnu', 'NADJET', 'FEMME', 'BELMADANI', '0780686969', 350),
+   (322, '2004-02-05', 'imranerezaig@gmail.com', 'Imrane', 'HOMME', 'REZAIG', '0646923450', 351),
+   (323, '2007-04-09', 'ayoubenfrid57@gmail.com', 'GHITA', 'FEMME', 'BOUDABYA ', '0784970691', 352),
+   (324, '2010-06-09', 'belarbimous57@gmail.com', 'Moustafa', 'HOMME', 'BELARBI', '0751223318', 353),
+   (325, '2008-04-10', 'inconnu', 'Enzo', 'HOMME', 'NIMSGERN', 'Inconnu', 354),
+   (326, '2008-10-27', 'inconnu', 'BELMIN', 'HOMME', 'MUJANOVIC', 'INCONNU', 355),
+   (327, '2009-10-29', 'inconnu', 'RYAN', 'HOMME', 'RENAUDIN', 'INCONNU', 356),
+   (328, '2007-08-05', 'samuelsohier57@gmail.com', 'Samuel', 'HOMME', 'SOHIER', '0604008741', 357),
+   (329, '2005-12-30', 'inconnu', 'Amine', 'HOMME', 'LHIOUI', 'inconnu', 358),
+   (330, '2005-01-07', 'khey57.ayoub@gmail.com', 'ayoub', 'HOMME', 'KHEY', '0767206635', 359),
+   (331, '2009-08-18', 'inconnu', 'Jawid', 'HOMME', 'AFZALI', '0766150198', 360),
+   (332, '2001-06-27', 'leabmdesign@gmail.com', 'Lea', 'FEMME', 'BLOCH', 'Inconnue', 361),
+   (333, '1968-01-24', 'inconnue', 'Fatima', 'FEMME', 'BENAHMED', '0767840553', 362),
+   (334, '1985-08-27', 'nicolas-pierson@outlook.com', 'Nicolas', 'HOMME', 'PIERSON', '0688266152', 363),
+   (335, '1985-09-13', 'inconnue', 'Odile', 'FEMME', 'ABRIAL', 'Inconnue', 364),
+   (336, '1965-04-13', 'inconnue', 'Marie', 'FEMME', 'GREVELDINGER', 'Inconnue', 365),
+   (337, '1963-05-28', 'inconnue', 'Hohnet', 'HOMME', 'SARITAS', 'Inconnue', 366),
+   (338, '1968-02-15', 'inconnue', 'Monique', 'FEMME', 'DEFFEZ', 'Inconnue', 367),
+   (339, '1998-04-15', 'inconnue', 'Rihab', 'FEMME', 'ABDALBAGE', 'Inconnue', 368),
+   (340, '1979-11-24', 'inconnue', 'Mathild', 'FEMME', 'ALRAHID', 'Inconnue', 369),
+   (341, '1976-10-23', 'inconnue', 'Nedie', 'FEMME', 'LOUIZ', 'Inconnue', 370),
+   (342, '1985-02-25', 'inconnu', 'Lionel', 'HOMME', 'DURIEZ', 'Inconnu', 371),
+   (343, '2023-11-14', 'inconnue', 'Daniele', 'FEMME', 'VINCENT', 'Inconnu', 372),
+   (344, '2023-12-30', 'inconnue', 'Philipe', 'HOMME', 'PEZZOTTA', 'Inconnue', 373),
+   (345, '1986-06-09', 'inconnu', 'Boileau', 'HOMME', 'MJC', 'Inconnu', 374),
+   (346, '1979-09-19', 'inconnu', 'Christophe', 'HOMME', 'ZYDKO', 'Inconnu', 375),
+   (347, '2010-08-19', 'inconnu', 'Souad', 'FEMME', 'ABDALBAGE', 'Inconnu', 376);
+
+-- --------------------------------------------------------
+
+
+CREATE TABLE IF NOT EXISTS `event_types` (
+    `id` bigint(20) NOT NULL,
+    `name` varchar(255) NOT NULL
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Déchargement des données de la table `event_types`
+--
+
+--
+-- Structure de la table `event_types`
+--
+
+INSERT INTO `event_types` (`id`, `name`) VALUES
+                                             (74, 'Atelier de découverte des outils de fabrication numériques '),
+                                             (72, 'Atelier qpv 2023 Bellecroix'),
+                                             (67, 'Atelier qpv Boileau 2023'),
+                                             (69, 'Atelier qpv Borny 2023'),
+                                             (68, 'Atelier qpv hd Vallières 2023'),
+                                             (70, 'Atelier qpv quartier du Roy 2023'),
+                                             (54, 'Ateliers numériques FabLab MDesign '),
+                                             (29, 'Ateliers numériques qpv'),
+                                             (60, 'Décembre ateliers numériques qpv'),
+                                             (56, 'Démonstration publique '),
+                                             (55, 'Repair Café Fablab MDesign '),
+                                             (59, 'Repair café jeunes Département 110h'),
+                                             (33, 'Repaire café qpv'),
+                                             (57, 'Travaux de mise en place Tiers lieu MDESIGN ');
+
 --
 -- Structure de la table `events`
 --
 
-CREATE TABLE `events` (
+--
+-- Déchargement des données de la table `events`
+--
+
+CREATE TABLE IF NOT EXISTS `events` (
   `id` bigint(20) NOT NULL,
   `date` date NOT NULL,
   `end_time` time DEFAULT NULL,
@@ -395,9 +716,9 @@ CREATE TABLE `events` (
   `type_id` bigint(20) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Déchargement des données de la table `events`
---
+-- --------------------------------------------------------
+
+
 
 INSERT INTO `events` (`id`, `date`, `end_time`, `name`, `sold_hours`, `start_time`, `url`, `address_id`, `type_id`) VALUES
 (8, '2022-12-13', '22:00:00', 'Repair-Café Bon Pasteur Metz/ Borny ', 25, '19:00:00', '', 12, 33),
@@ -468,20 +789,20 @@ INSERT INTO `events` (`id`, `date`, `end_time`, `name`, `sold_hours`, `start_tim
 (83, '2023-06-16', '21:00:00', 'Atelier IA/ChatGPT', 4, '17:00:00', '', 26, 69),
 (84, '2023-06-20', '22:30:00', 'Repair café - Kairos ', 3, '19:30:00', '', 14, 72);
 
--- --------------------------------------------------------
-
+--
+-- Déchargement des données de la table `events_contacts`
+--
 --
 -- Structure de la table `events_contacts`
 --
 
-CREATE TABLE `events_contacts` (
+CREATE TABLE IF NOT EXISTS `events_contacts` (
   `event_id` bigint(20) NOT NULL,
   `contacts_id` bigint(20) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Déchargement des données de la table `events_contacts`
---
+-- --------------------------------------------------------
+
 
 INSERT INTO `events_contacts` (`event_id`, `contacts_id`) VALUES
 (19, 2),
@@ -515,20 +836,21 @@ INSERT INTO `events_contacts` (`event_id`, `contacts_id`) VALUES
 (71, 105),
 (71, 276);
 
--- --------------------------------------------------------
-
+--
+-- Déchargement des données de la table `events_hosts`
+--
 --
 -- Structure de la table `events_hosts`
 --
 
-CREATE TABLE `events_hosts` (
+CREATE TABLE IF NOT EXISTS `events_hosts` (
   `event_id` bigint(20) NOT NULL,
   `hosts_id` bigint(20) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Déchargement des données de la table `events_hosts`
---
+-- --------------------------------------------------------
+
+
 
 INSERT INTO `events_hosts` (`event_id`, `hosts_id`) VALUES
 (17, 7),
@@ -671,20 +993,20 @@ INSERT INTO `events_hosts` (`event_id`, `hosts_id`) VALUES
 (84, 234),
 (84, 332);
 
--- --------------------------------------------------------
-
+--
+-- Déchargement des données de la table `events_participants`
+--
 --
 -- Structure de la table `events_participants`
 --
 
-CREATE TABLE `events_participants` (
+CREATE TABLE IF NOT EXISTS `events_participants` (
   `event_id` bigint(20) NOT NULL,
   `participants_id` bigint(20) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Déchargement des données de la table `events_participants`
---
+-- --------------------------------------------------------
+
 
 INSERT INTO `events_participants` (`event_id`, `participants_id`) VALUES
 (18, 2),
@@ -1198,346 +1520,10 @@ INSERT INTO `events_participants` (`event_id`, `participants_id`) VALUES
 -- --------------------------------------------------------
 
 --
--- Structure de la table `event_types`
---
-
-CREATE TABLE `event_types` (
-  `id` bigint(20) NOT NULL,
-  `name` varchar(255) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Déchargement des données de la table `event_types`
---
-
-INSERT INTO `event_types` (`id`, `name`) VALUES
-(74, 'Atelier de découverte des outils de fabrication numériques '),
-(72, 'Atelier qpv 2023 Bellecroix'),
-(67, 'Atelier qpv Boileau 2023'),
-(69, 'Atelier qpv Borny 2023'),
-(68, 'Atelier qpv hd Vallières 2023'),
-(70, 'Atelier qpv quartier du Roy 2023'),
-(54, 'Ateliers numériques FabLab MDesign '),
-(29, 'Ateliers numériques qpv'),
-(60, 'Décembre ateliers numériques qpv'),
-(56, 'Démonstration publique '),
-(55, 'Repair Café Fablab MDesign '),
-(59, 'Repair café jeunes Département 110h'),
-(33, 'Repaire café qpv'),
-(57, 'Travaux de mise en place Tiers lieu MDESIGN ');
-
--- --------------------------------------------------------
-
---
--- Structure de la table `persons`
---
-
-CREATE TABLE `persons` (
-  `id` bigint(20) NOT NULL,
-  `date_of_birth` date NOT NULL,
-  `email` varchar(255) DEFAULT NULL,
-  `first_name` varchar(255) NOT NULL,
-  `gender` varchar(255) NOT NULL,
-  `last_name` varchar(255) NOT NULL,
-  `phone` varchar(255) DEFAULT NULL,
-  `address_id` bigint(20) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Déchargement des données de la table `persons`
---
-
-INSERT INTO `persons` (`id`, `date_of_birth`, `email`, `first_name`, `gender`, `last_name`, `phone`, `address_id`) VALUES
-(2, '1977-12-07', 'fawzikach@hotmail.com ', 'Kachouri', 'HOMME', 'Fawzi ', '0769913800', 28),
-(6, '1985-12-07', 'Philippecarter@wanadoo.fr', 'Philippe ', 'HOMME', 'Hubert ', '0643734337', 32),
-(7, '1993-12-01', 'milejeansy@gmail.com', 'Jean sylvestre', 'HOMME', 'ZOUANDA NDORO', '0758503040 ', 33),
-(8, '1987-12-01', 'nadinelatif57@gmail.com', 'Nadine', 'FEMME', 'LATIF', '+33695613948', 34),
-(10, '1992-12-01', 'Joaquim.ferreira899@orange.fr', 'Joaquim ', 'HOMME', 'Ferrerira', '0643860082', 36),
-(17, '1980-02-27', 'fab57fr@hotmail.com', 'Fabrice', 'HOMME', 'GRUNEWALD', '0663041572', 45),
-(18, '2022-12-10', 'antoine.criscitelli@orange.fr', 'Antoine', 'HOMME', 'CRISCITELLI', '0772322660', 46),
-(19, '2022-11-12', 'j-c.cugnet@laposte.net', 'Jean-Claude', 'HOMME', 'CUGNET', '0628087578', 47),
-(20, '2022-12-22', 'charhi.k@gmail.com', 'Charhi', 'HOMME', 'KAMAL', '0642463527', 48),
-(21, '2022-12-14', 'k.men54@yahoo.fr', 'Kamen', 'HOMME', 'KEMMOUN', '0652035044', 49),
-(22, '2022-12-14', 'on5at.thierry@gmail.com', 'Thierry', 'HOMME', 'GALERIN', '0032496987536', 50),
-(23, '2022-12-21', 'dupont.jerome@gmai.com', 'Jerôme', 'HOMME', 'DUPONT ', '0682979470', 51),
-(24, '2022-12-13', 'f4iuc@orang.fr', 'Mustapha', 'HOMME', 'BIUCHEMLA', '0683831550', 52),
-(25, '2001-12-10', 'elias@hotmail.fr', 'Elias', 'HOMME', 'JONATHAN ', '0600000000', 53),
-(26, '1987-05-11', 'leila@mjc-borny', 'Leilq', 'FEMME', 'SLIMANI', '0677648227', 54),
-(27, '1981-01-16', 'nialnawel27@gmike.com', 'Nawel', 'FEMME', 'KHELIFA', '0784572304', 55),
-(28, '1950-11-05', 'pierre.heiss@neuf.fr', 'Pierre', 'HOMME', 'HEISS', '0661579435', 56),
-(29, '1955-04-28', 'odileulrich@live.fr', 'Marie Odile ', 'FEMME', 'ULRICH ', '0652848018', 57),
-(30, '1958-05-11', 'pascale.gaudard57@gmail.com', 'Pascale', 'FEMME', 'GAUDARD', '0635491196', 58),
-(32, '1950-07-21', 'stanislas.pelech@neuf.fr', 'Michele', 'FEMME', 'PELECH', 'O620434232', 60),
-(33, '1953-12-11', 'cpfb57000@gmail.com', 'Catherine', 'FEMME', 'PERNET FRENTZEL', '0682377516', 61),
-(34, '1984-12-22', 'virgile.frentzel@gmail.com', 'Virgile', 'HOMME', 'FRENTZEL', '0637682742', 62),
-(36, '1950-12-29', 'isabelle.miredurand@gmail.com', 'Isabelle', 'FEMME', 'MIRE', '0671750848', 64),
-(37, '2001-02-04', 'rochberthollet@gmail com', 'hcoR', 'HOMME', 'TELLOHTREB', '0627950512', 65),
-(39, '1950-02-03', 'jacqueswirth@hotmail.com', 'Jacques', 'HOMME', 'WIRTH', '0652814987', 67),
-(40, '1948-12-22', 'puissegur.jf@gmail.com', 'Yolande', 'FEMME', 'PUISSEGUR', '0664418094', 68),
-(41, '1999-03-16', 'chretiennot.leopold@gmail.com', 'Léopold', 'HOMME', 'CHRÉTIENNOT', '0783671090', 69),
-(42, '1993-11-06', 'cas.rigolot@gmail.com', 'Cassandra', 'FEMME', 'RIGOLOT', '0699293454', 70),
-(43, '2002-01-11', 'aveevad7@gmail.com', 'Eva', 'FEMME', 'GUILBERT', '0627876343', 71),
-(44, '1959-05-08', 'jean-pierre.goudot@orange.fr', 'Jean pierre', 'HOMME', 'GOUDOT', '0672326503', 72),
-(45, '2010-03-09', 'aureproc57070@gmail.com', 'Lohane', 'FEMME', 'CACOILO', '0753120227', 73),
-(46, '2010-11-26', 'rizuana.rexhepi@gmail.com', 'Rizuana', 'FEMME', 'REXHEPI', '0766472842', 74),
-(51, '2004-12-21', 'antonypeltre5757@gmail.com', 'Antony', 'HOMME', 'PELTRE', '0783135030', 79),
-(52, '2007-05-13', 'charpentier.melissa88@gmail.com', 'Mélissa', 'FEMME', 'CHARPENTIER', '0640 87 83 39', 80),
-(53, '2010-04-20', 'charpentier.deborah8857@gmail.com', 'Deborah ', 'FEMME', 'CHARPENTIER ', '0786 94 40 80 ', 81),
-(54, '1999-10-28', 'andymichalak.mdesign@gmail.com', 'Andy', 'HOMME', 'MICHALAK', '0638485096', 82),
-(55, '2011-05-29', 'etmatekakese@gmail.com', 'Etmate', 'HOMME', 'KAKESE ', '0775216877', 83),
-(56, '2010-03-13', 'sonia.chebah9@icloud.com', 'Sonia', 'FEMME', 'CHEBAH', '0749969882', 84),
-(57, '2022-08-29', 'saraaafal@icloud.com', 'Sara', 'FEMME', 'FAL', '0636370952', 85),
-(61, '2008-02-01', 'naelkachou@gmail.com', 'Nael', 'HOMME', 'KACHOURI ', '0651502920', 89),
-(62, '2011-11-29', 'maiakach@gmail.com', 'Maïa', 'FEMME', 'KACHOURI ', '0610648418', 90),
-(63, '2006-02-20', 'hanaaaldughaim5@gmail.com', 'Youssef ', 'HOMME', 'AL DUGHAIM', '0677300006', 91),
-(64, '2008-01-01', 'www@gmail.com', 'Mohamed Nur ', 'HOMME', 'AL DUGHAIM ', '0606070809', 92),
-(65, '2010-06-16', 'camillianfz26gmail.com', 'Camillia', 'FEMME', 'NEFZI', '0780277363', 93),
-(66, '2015-12-10', 'dff@hotmail.com', 'Alea', 'FEMME', 'REXHEPI', '0781837997', 94),
-(67, '2006-07-20', 'farsesfakeemail@gmail.com', 'Farès ', 'HOMME', 'DOUADI', '0620507997', 96),
-(68, '1988-10-16', 'asma.baouendi@outlook.fr', 'Asma', 'FEMME', 'BAOUENDI', '0659589177', 97),
-(69, '2011-05-09', 'lianamovsesyan1982@gmail.com', 'Hasmik', 'FEMME', 'MOVSESYAN', '0767267881', 98),
-(70, '2011-01-16', 'henry92i@hotmail.com', 'Shamila', 'FEMME', 'RENAULT', '0661787114', 99),
-(71, '2011-05-09', 'senaid.cirak@laposte.net', 'Naida', 'FEMME', 'CIRAK', '0758293827', 100),
-(73, '2011-06-27', 'familles@contact-kairos.fr', 'Dario', 'HOMME', 'DI TULLIO', '0614284207', 102),
-(74, '1953-08-03', 'asscuncao-joaquim@yahoo.fr', 'Maria', 'FEMME', 'ASSCUNCAO', '0663149340', 103),
-(75, '1966-01-11', 'amelasma57@gmail.com', 'Amel', 'FEMME', 'BEN FRADJ', '0651427060', 104),
-(76, '1975-04-28', 'fauxmail@fauxmail.com', 'Kadouja ', 'FEMME', 'OLMI', '0707080608', 105),
-(77, '1954-07-23', 'patrickfournillon10@gmail.com', 'Patrick', 'HOMME', 'FOURNILLON', '0636151666', 106),
-(78, '2004-10-06', 'fsteloy@gmail.com', 'Fares', 'HOMME', 'BENMEDDAH', '0646854373', 107),
-(79, '2009-12-01', 'ziadrayane57@icloud.com', 'Rayane', 'HOMME', 'ZIAD', '0612823569', 108),
-(80, '2009-09-04', 'lahyaoui.moussa@gmail.com', 'Moussa', 'HOMME', 'LAHYAOUI', '0666554580', 109),
-(81, '2008-07-13', 'h.taharia@laposte.net', 'Farah', 'FEMME', 'TAHARIA', '0646652516', 110),
-(82, '2023-01-08', 'nazimhedli57@icloud.com', 'Nazim', 'HOMME', 'HEDLI', '0782054077', 111),
-(83, '2010-10-02', 'ineszaoud@gmail.com', 'Abdelkader', 'HOMME', 'BELKHEDIM', '0000000000000', 112),
-(84, '2008-02-06', 'hhjjjjjjj@gmail.com', 'Tibyan', 'FEMME', 'YASSIR BUSHRA', '000000000000000', 113),
-(85, '2011-08-14', 's@gmail.com', 'Serena', 'FEMME', 'BELKHEDIM', '060000000000', 114),
-(86, '2008-10-01', 'm@yahoo.com', 'Mohamed', 'HOMME', 'BAH', '0749831707', 115),
-(87, '2009-12-23', '00000', 'Meyssa', 'FEMME', 'YAHOUI', '000000', 116),
-(88, '2009-10-20', 'jena573@icloud.com', 'Jena', 'FEMME', 'MSIRDI', '0782931374', 117),
-(89, '2011-02-12', 'lyna.fellag@icloud.com', 'Lyna', 'FEMME', 'LEGRAND', '0769587411', 118),
-(90, '2011-03-07', 'rahimikrame2@gmail.com', 'Ikrame', 'FEMME', 'RAHIM', '0782186244', 119),
-(91, '2004-07-13', 'ines.zouiad@gmail.com', 'Ines', 'FEMME', 'ZOUAID', '0658444759', 120),
-(92, '2005-02-08', 'kouicilydia@icloud.com', 'Lydia', 'FEMME', 'KOUICI', '0651144280', 121),
-(93, '2005-12-16', 'leina.16@icloud.com', 'Leina ', 'FEMME', 'KARAOUET', '0695182451', 122),
-(94, '2008-09-18', 'adembrahma@gmail.com', 'Adem', 'HOMME', 'YILDIRIM', '0629527333', 123),
-(95, '2011-02-20', 'sidifyzi@gmail.com', 'Housni', 'HOMME', 'BENSAHLA', '0387 76 17 14 00', 124),
-(96, '2010-07-05', 'abdoulcires2010@gmail.com', 'Abdoulaye', 'HOMME', 'SYLLA', '0753122373', 125),
-(97, '2011-10-19', 'pas.de.mail', 'Nina', 'FEMME', 'LALLEMENT', 'Pasde téléphone ', 126),
-(99, '2010-06-19', 'tnzk.57@gmail.com', 'Soufiane', 'HOMME', 'ZERYOUH', '00000000000', 128),
-(100, '2009-10-10', 'mazari.wael@icloud.com', 'Wael', 'HOMME', 'MAZARI', '0749264830', 129),
-(101, '2011-11-03', 'rayanbat.213@gmail.com', 'Rayane ', 'HOMME', 'BATOUCHE', '0750031878', 130),
-(102, '2006-08-28', 'vvdanes3@gmail.com', 'Buchra', 'HOMME', 'YASSIR', '0773204882', 131),
-(103, '2009-12-27', 'syrine.bslma57@gmail.com', 'Syrine', 'FEMME', 'BEN SLIMA', '0778075946', 132),
-(104, '2009-04-28', 'inconnus', 'Yousra', 'FEMME', 'AMDA ', '0749406276', 133),
-(105, '2009-09-15', 'inconnue', 'Luciano', 'HOMME', 'INCANNELLA', '0633613203', 134),
-(106, '1970-01-01', 'pas de mail', 'Belkacem', 'HOMME', 'BEN CHABANE', '0683993118', 135),
-(107, '1970-01-01', 'inconnu', 'Nordine', 'HOMME', 'BEN CHABANE', 'Inconnu', 136),
-(118, '2000-01-01', 'degrandfidele@gmail.com', 'Fidèle ', 'HOMME', 'DEGRAND ', '123456789', 147),
-(119, '2011-09-07', 'thalina.salimier@icloud.com', 'Thalina', 'FEMME', 'SALIMIER', '0612992676', 148),
-(129, '2000-01-01', 'essai@gmail.com', 'Essai', 'HOMME', 'ESSAI ', '0908888888', 158),
-(130, '2000-02-10', 'inconnu@essai.fr', 'Essai 2', 'HOMME', 'ESSAI 2', '0922222222', 159),
-(132, '2007-02-11', 'louannsurawe@gmail.com', 'Lou-ann', 'FEMME', 'SURAWE', '0618650945', 161),
-(133, '2007-04-22', 'shaunaweiss.23@icloud.com', 'Shauna', 'FEMME', 'JOLY WEISS', '0624792279', 162),
-(134, '2007-01-13', 'guirfabio1301@gmail.com', 'Fabio', 'HOMME', 'GUIR', '0650804032', 163),
-(135, '2007-04-18', 'clarisssabieth@gmail.com', 'Clarissa', 'FEMME', 'BIETH', '0767243336', 164),
-(136, '2006-12-05', 'amylasapologue@gmail.com', 'Amy', 'FEMME', 'BAMBA', '0615389090', 165),
-(137, '2005-10-27', 'elodiebouhl@gmail.com', 'Elodie', 'FEMME', 'BOUHL', '0623755489', 166),
-(138, '2005-01-06', 'qleguen7@gmail.com', 'Quentin', 'HOMME', 'LE GUEN', '0629481345', 167),
-(153, '2000-02-01', 'inconnug@essai.fr', 'Taski', 'HOMME', 'TESKI', '0778878899', 182),
-(155, '2010-02-16', 'lyak1971@gmail.com', 'Sœur ', 'FEMME', 'PETITE ', '00009999900', 184),
-(156, '1951-10-10', 'anravon@orange.fr', 'Claude', 'HOMME', 'RAVON ', '062444446043', 185),
-(157, '1960-01-01', 'conrad.th@orange.fr', 'Thierry ', 'HOMME', 'CONRAD ', '0000000000', 186),
-(159, '2009-04-10', 'mail@inconnu.com', 'David', 'HOMME', 'MARSAL', '9991939596', 188),
-(165, '2010-05-12', 'lyak1971@gmail.com', 'Lycia', 'FEMME', 'AKEB', 'Inconnu', 194),
-(166, '2010-06-11', 'inconnu', 'Sofiane', 'HOMME', 'KLECZEWSKI', 'Inconnu', 195),
-(167, '2010-11-30', 'inconnu', 'Ilana', 'FEMME', 'SHULER', 'Inconnu', 196),
-(168, '2010-10-27', 'inconnu', 'Elisa', 'FEMME', 'NERSESIJAN', 'Inconnu', 197),
-(169, '2010-07-02', 'inconnu', 'Adam', 'HOMME', 'EL MZOURI', 'Inconnu', 198),
-(170, '2011-07-05', 'inconnu', 'Diana', 'FEMME', 'NURISLAMOV', 'Inconnu', 199),
-(172, '2009-04-09', 'inconnu', 'Harmony', 'HOMME', 'BOUHL', 'Inconnu', 201),
-(173, '2009-07-23', 'inconnu', 'Ziad', 'HOMME', 'BENDEKKICHE', 'Inconnu', 202),
-(174, '2009-06-09', 'inconnu', 'Acelya', 'FEMME', 'BRUNAUD', 'Inconnu', 203),
-(175, '2009-12-31', 'durovicalmin25gmail.com', 'Almin', 'HOMME', 'DUROVIC', 'Inconnu', 204),
-(176, '2009-04-26', 'inconnu', 'Younes', 'HOMME', 'MERIKHI', 'Inconnu', 205),
-(177, '2010-01-01', 'inconnu', 'Tania', 'FEMME', 'AKEB', 'Inconnu', 206),
-(178, '2010-01-01', 'inconnu', 'Amar', 'HOMME', 'KRSIC', 'Inconnu', 207),
-(179, '2010-01-01', 'inconnu', 'Kendji', 'FEMME', 'VELER', 'Inconnu', 208),
-(180, '2023-02-07', 'mylo57@hotmail.fr', 'Laurence', 'FEMME', 'STEFNER ', 'Inconnu', 209),
-(181, '2023-02-07', 'malek57@live.fr', 'Zayia', 'FEMME', 'BOUADDAH', 'Inconnu', 210),
-(182, '2023-02-07', 'hamzakouakoua@gmail.com', 'Hamza', 'HOMME', 'KOUAKOUA', 'Inconnu', 211),
-(183, '2023-02-07', 'boufarha@riv54.fr', 'Farah', 'FEMME', 'BOUCEFAR', 'Inconnu', 212),
-(184, '2023-02-07', 'inconnu', 'Lucas', 'HOMME', 'BOUCEFAR', 'Inconnu', 213),
-(185, '2023-02-07', 'ademfergane@gmail.com', 'Djillali', 'HOMME', 'FERGANE', 'Inconnu', 214),
-(186, '2023-02-07', 'f.awal85@laposte.net', 'Franck', 'HOMME', 'AWAL', 'Inconnu', 215),
-(187, '2023-02-07', 'rumeysa0529@gmail.com', 'Rumeysa', 'FEMME', 'ANSLAN', 'Inconnu', 216),
-(188, '2023-02-07', 'aysenurarslan57140@gmail.com', 'Ayse', 'FEMME', 'ARLAN', 'Inconnu', 217),
-(189, '2023-02-07', 'inconnu', 'Marie louise', 'FEMME', 'DOS SANTOS', '0387305647', 218),
-(190, '2023-02-07', 'inconnu', 'Nordine', 'HOMME', 'BEN CHABANE', 'Inconnu', 219),
-(191, '2023-02-07', 'inconnu', 'Belkacem', 'HOMME', 'BEN CHABANE', '0683993118', 220),
-(192, '2023-02-07', 'inconnu', 'Jennyfer', 'FEMME', 'NGORES ', 'Inconnu', 221),
-(193, '2023-02-07', 'inconnu', 'Jennyfer', 'FEMME', 'NGOMES', 'Inconnu', 222),
-(194, '2023-02-07', 'inconnu', 'Zohra', 'FEMME', 'NACHFEN', 'Inconnu', 223),
-(195, '2023-02-07', 'inconnu', 'Chakila', 'FEMME', 'CHAKILA', 'Inconnu', 224),
-(196, '2023-02-07', 'inconnu', 'Suzanne', 'FEMME', 'ARSLAN', 'Inconnu', 225),
-(197, '2023-02-07', 'inconnu', 'fabrice', 'HOMME', 'WILLON ', 'Inconnu', 226),
-(198, '2023-02-07', 'inconnu', 'Valerie', 'FEMME', 'WILLON', 'Inconnu', 227),
-(199, '1980-09-27', 'gaetan.roelens@gmail.com', 'Gaetan', 'HOMME', 'ROELENS', '0667985414', 228),
-(200, '2015-07-25', 'inconnu', 'Flora', 'FEMME', 'ROELENS', 'Inconnu', 229),
-(201, '2008-10-31', 'inconnu', 'Roelens', 'FEMME', 'ZIA', 'Inconnu', 230),
-(202, '2008-08-18', 'raoulvanvlemmeren@gmail.com', 'Raoul', 'HOMME', 'VAN VLEMMEREN', '0685756718', 231),
-(203, '2007-04-26', 'kyllianpoullain723@gmail.com', 'Kyllian', 'HOMME', 'POULLAIN', '0382596610', 232),
-(204, '1988-02-10', 'fajo.educateurs@gmail.com', 'Will', 'HOMME', 'WILL', '0382596610', 233),
-(205, '2008-08-24', 'fajo.educateurs@gmail.com', 'Kylian', 'HOMME', 'ROCH', '0382596610', 234),
-(206, '1998-01-20', 'jeancelina.m@outlook.fr', 'Jeancelina', 'FEMME', 'MIGUEL', '0783899896', 235),
-(207, '2009-06-22', 'inconnu', 'Salim', 'HOMME', 'NORALGALIL', 'Inconnu', 236),
-(208, '2005-05-25', 'inconnu', 'Nolan', 'HOMME', 'TINTINGER', 'Inconnu', 237),
-(209, '1973-01-01', 'inconnu', 'Frédéric ', 'FEMME', 'SHNUR', '+336 75 25 64 66', 238),
-(210, '1977-01-27', 'marxjul@gmail.com', 'Julien ', 'HOMME', 'MARX', '0678762718', 239),
-(211, '1987-01-01', 'inconnu', 'Nicolas ', 'HOMME', 'AMBRY', '+336 81 20 52 03', 240),
-(212, '2010-03-01', 'inconnu', 'HISHAM', 'HOMME', 'TAWIL', 'Inconnu', 241),
-(213, '2011-07-16', 'inconnu', 'Moustafa', 'HOMME', 'TABET', '0787422137', 242),
-(214, '2011-03-10', 'inconnu', 'Alicia', 'FEMME', 'MYGARDON FAORO ', '0679088841', 243),
-(215, '2010-01-01', 'inconnu', 'Kaila', 'FEMME', 'LAMOR', '0000000000000000', 244),
-(216, '2010-01-01', 'inconnu', 'Adam', 'HOMME', 'SEDDIKI', '0000000000', 245),
-(217, '2006-01-01', 'inconnu', 'Nessim', 'HOMME', 'ARROUS', '0000000000', 246),
-(218, '2007-01-01', 'inconnu', 'Khaled', 'HOMME', 'ADDA', '0000000000', 247),
-(219, '2006-01-01', 'inconnu', 'Rayan', 'HOMME', 'GNOUL', '00000000000000000', 248),
-(220, '1956-12-27', 'danieljonvaux@live.fr', 'DANIEL', 'HOMME', 'JONVAUX', '0652848018', 249),
-(221, '1959-05-24', 'marie6.saccol@gmail.com', 'Marie', 'FEMME', 'SACCOL', '0681382548', 250),
-(222, '2023-03-14', 'jardin1130@gmail.com', 'Danielle', 'FEMME', 'LARRIERE', '0686592805', 251),
-(223, '1953-12-11', 'cpfb57000@gmail.com', 'Catherine', 'FEMME', 'PERNET', '0682377516', 252),
-(224, '1950-02-05', 'inconnu', 'Belkacem', 'HOMME', 'BENCHABANE', '0683993118', 253),
-(225, '1954-12-25', 'njm57.castagnetto@gmail.com', 'Noelle', 'FEMME', 'CASTAGNETTO', '0623502476', 254),
-(226, '1954-12-07', 'haliltahar437@gmail.com', 'Tahar', 'HOMME', 'HALIL', '0782434130', 255),
-(227, '1965-11-11', 'aubertgilles56@gmail.com', 'GILLES', 'HOMME', 'AUBERT', '0651892496', 256),
-(228, '1958-06-06', 'm.tornicelli@wanadoo.fr', 'Maurice', 'HOMME', 'TORNICELLI', '0633515443', 257),
-(229, '1966-04-25', 'm-p.brisse@orange.fr', 'Marie Pierre', 'FEMME', 'BRISSE', '0668662799', 258),
-(230, '1966-05-22', 'dambrine@free.fr', 'MARIE ODILE', 'FEMME', 'DAMBRINE', '0646464784', 259),
-(231, '1969-06-04', 'frederic.chudeau@gmail.com', 'Frederic', 'HOMME', 'CHUDEAU', '0652101959', 260),
-(232, '2023-03-02', 'mickael.meri@neuf.fr', 'Mickael', 'HOMME', 'MERI', '0602233531', 261),
-(233, '2007-02-27', 'inconnu', 'VASVIÉ', 'FEMME', 'IBRAHIMI', '0699732728', 262),
-(234, '2001-04-14', 'fabien.mdesign.com', 'Fabien', 'HOMME', 'ARIANO', '0688561427', 263),
-(235, '1945-07-23', 'anravon@orange.fr', 'Andre', 'HOMME', 'RAVON', '0614259098', 264),
-(236, '1981-03-16', 'babz57000@gmail.com', 'Nabil', 'HOMME', 'GUYLIZ', '0623502476', 265),
-(237, '1975-12-21', 'florence.ligouzat@orange.fr', 'Florence', 'FEMME', 'LIGOUZAT', '0662453428', 266),
-(238, '2006-05-03', 'aurelien.hoffmann57@gmail.com', 'Aurélien', 'HOMME', 'HOFFMANN', '0633821821', 267),
-(239, '2012-07-18', 'inconnu', 'Louise', 'HOMME', 'VIVARELLI ', 'Inconnu', 268),
-(240, '2013-03-19', 'inconnu', 'Mathieu ', 'HOMME', 'GRUN', 'Inconnu', 269),
-(241, '2009-04-17', 'fajo.educateurs@gmail.com', 'Cristiano', 'HOMME', 'MARCINIAK', '0382596610', 270),
-(242, '2007-06-25', 'fajo.educateurs@gmail.com', 'Julien', 'HOMME', 'MARTZ', '0382596610', 271),
-(243, '2001-04-17', 'adrienpeltre28@gmail.com', 'Adrien', 'HOMME', 'PELTRE ', '0614549035', 272),
-(244, '1999-06-11', 'kimberleylagal99@gmail.com', 'Kimberley', 'FEMME', 'LAGAL', 'Inconnu', 273),
-(245, '2011-11-06', 'noellyarnould642@gmail.com', 'NOELLY', 'FEMME', 'ARNOULD', '0753820655', 274),
-(246, '2023-10-19', 'sonia.chebah@gmail.com', 'Sirine', 'FEMME', 'CHEBAH', '0605729169', 275),
-(247, '2010-05-25', 'inconnu', 'Emma', 'FEMME', 'GEHL', 'Inconnu', 276),
-(248, '2011-05-06', 'inconnu', 'Lea', 'FEMME', 'HARTNAGEL', 'Inconnu', 277),
-(249, '2008-04-17', 'crosswegan@gmail.com', 'Samy', 'HOMME', 'BENAISSA', '+337 50 70 73 76', 278),
-(250, '2009-01-25', 'benamarnoureddine0@gmail.com', 'Zakaria', 'HOMME', 'BENAMAR', 'Inconnu', 279),
-(251, '2014-03-07', 'inconnu', 'Nelya', 'FEMME', 'BOUZIDI', '0768015351', 280),
-(252, '2010-05-12', 'inconnu', 'Tania', 'FEMME', 'AKEB', '0603394161', 281),
-(253, '1947-07-09', 'papyjeff2384@gmail.com', 'Jean Françoiss', 'HOMME', 'PUISSEGUR', '0664418094', 282),
-(254, '1983-09-28', 'sindyfahmyhanna@yahoo.fr', 'Sindy', 'FEMME', 'FAHMY HANNA ', '0618741263', 283),
-(255, '1956-04-14', 'astridlozach@me.com', 'Astrid', 'FEMME', 'LOZACH', '0610162202', 284),
-(256, '1947-01-20', 'fbboussedira@gmail.com', 'Ferhat', 'HOMME', 'BOUSSEDIRA', '0666576210', 285),
-(257, '1961-02-18', 'dominique.jobard57@gmail.com', 'Dominique', 'HOMME', 'JOBARD', '0688714530', 286),
-(258, '1952-12-08', 'edefeyter57@gmail.com', 'Etienne', 'HOMME', 'DE FEYTER', '0672069147', 287),
-(259, '1976-02-03', 'malek57@live.fr', 'ZAYIA', 'FEMME', 'BOUHADDA', '0766236293', 288),
-(260, '1966-01-18', 'nourikh@hotmail.fr', 'Kheira', 'FEMME', 'NOURI', '0624342704', 289),
-(261, '1973-03-28', 'eliz73feuga@gmail.com', 'elizabeth', 'FEMME', 'FEUGA', '0769904823', 290),
-(262, '2000-01-01', 'remy.paquet@orange.fr', 'Remy', 'HOMME', 'PAQUET', 'inconnu', 291),
-(263, '2000-01-01', 'chouikhahejer@yahoo.fr', 'Hejer', 'FEMME', 'CHOUIKHA', '000000000', 292),
-(264, '2000-01-01', 'inconnu', 'Abdellah', 'HOMME', 'BOUKEDIL', '000000000', 293),
-(265, '2000-01-01', 'kayla.steel.folliot@gmail.com', 'Steel', 'FEMME', 'KAYLA FOLLIOT', '00000000', 294),
-(266, '2000-01-01', 'verolaufer@gmail.com', 'Veronique', 'FEMME', 'LAUFER', '0000000000', 295),
-(267, '1976-06-20', 'inconnu', 'Vincent', 'HOMME', 'MARCHETTI', '0675100062', 296),
-(268, '2007-10-28', 'rmanguan@gmail.com', 'Raychi Bless', 'HOMME', 'MANGUANA', '0766 73 10 64', 297),
-(269, '2011-06-16', 'tulelamanguana@gmail.com', 'Joychi Tulela', 'FEMME', 'MANGUANA', '00000', 298),
-(270, '2012-04-01', 'inconnu', 'Adèle', 'FEMME', 'METZINGER', 'Inconnu', 299),
-(271, '2012-03-31', 'inconnu', 'Louis', 'HOMME', 'SIX', 'Inconnu', 300),
-(272, '2010-08-01', 'inconnu', 'Nour', 'FEMME', 'TEKKOUK', '0766102407', 301),
-(273, '2013-12-26', 'inconnu', 'Basile', 'HOMME', 'SORE', 'Inconnu', 302),
-(274, '2012-01-17', 'elina.massenet@gmail.com', 'Elina', 'FEMME', 'MASSENET', 'Inconnu', 303),
-(275, '2005-04-01', 'rayanghoul11@gmail.com', 'Rayan', 'HOMME', 'GHOUL', '0668565068', 304),
-(276, '2009-08-26', 'rayanaguachour66@gmail.com', 'Rayan', 'HOMME', 'AGUACHOUR', '0744185104', 305),
-(277, '2005-03-30', 'anasmoghni@gmail.com', 'Anas', 'HOMME', 'ALLOU', '0783897946', 306),
-(278, '2006-11-16', 'salimjoestar@gmail.com', 'Salim', 'HOMME', 'TIOUTI', '0658690422', 307),
-(279, '2005-09-20', 'jonathanmbuku198@gmail.com', 'Jonathan', 'HOMME', 'MBUKU', '0644733947', 308),
-(280, '2009-05-30', 'khordjmellina@icloud.com', 'Mellina', 'FEMME', 'KHORDJ', '0623502476', 309),
-(281, '2006-03-04', 'lamisse029@gmail.com', 'Lamisse', 'FEMME', 'AROUCI', '0602416461', 310),
-(282, '2007-11-22', 'yamsss84@gmail.com', 'Yamina', 'FEMME', 'BELARBI ', '0784.62.85.77', 311),
-(283, '2011-01-29', 'inconnu', 'LOUANE', 'FEMME', 'FRANÇOIS', '0678078650', 312),
-(284, '2000-01-01', 'inconnu', 'Claudine', 'FEMME', 'WAGNER', '0000000000', 313),
-(285, '2000-01-01', 'inconnu', 'Benjamin', 'HOMME', 'BONERE ', '00000000000', 314),
-(286, '2000-01-01', 'michel.mercier@425orange.fr', 'Michel', 'FEMME', 'MERCIER', '0000000000', 315),
-(287, '2000-01-01', 'inconnu', 'Josiane', 'FEMME', 'TAESCH', '000000000', 316),
-(288, '2000-01-01', 'inconnu', 'Dominique', 'HOMME', 'DOTTOR', '00000000000', 317),
-(289, '2000-01-01', 'jean.grayo@modulonet.fr', 'jean', 'HOMME', 'GRAYO', '0777910858', 318),
-(290, '2000-01-01', 'inconnu', 'Claire', 'FEMME', 'GREBIL', '00000000000', 319),
-(291, '2000-01-01', 'georgeslapeyre@yahoo.fr', 'Georges', 'HOMME', 'LAPEYRE', '0387581910', 320),
-(292, '2000-01-01', 'rockberthollet@gmail.com', ' Rock', 'HOMME', 'BERTHOLLET', '0627950512', 321),
-(293, '2000-01-01', 'inconnu', '(amie de jean)', 'FEMME', 'ANDRÉE (AMIE DE JEAN)', '0387517832', 322),
-(294, '2000-01-01', 'inconnu', 'Franck', 'HOMME', 'ARNAL', '0000000000', 323),
-(295, '2000-01-01', 'inconnu', 'Jean Marie', 'HOMME', 'MIRE', '0000000000', 324),
-(296, '2000-01-01', 'inconnu', 'Jean Claude', 'HOMME', 'AUER', '000000000', 325),
-(297, '2000-01-01', 'judith.henrion@gmail.com', 'Judith', 'FEMME', 'HENRION', '000000000', 326),
-(298, '2000-01-01', 'inconnu', 'Morgane', 'FEMME', 'ARTOIS', '0674914683', 327),
-(299, '2000-01-01', 'inconnu', 'Monique', 'FEMME', 'THUILLER', '0649856030', 328),
-(300, '2000-01-01', 'jose.napoli@gmail.com', 'Joseph', 'HOMME', 'NAPOLI', '0669439099', 329),
-(301, '2000-01-01', 'inconnu', 'Fabienne', 'FEMME', 'BREIT', '0000000000', 330),
-(302, '2000-01-01', 'inconnu', 'Daniel', 'HOMME', 'BOUSSEDIRA', '0000000000', 331),
-(303, '2000-01-01', 'jacqueswirth@hotmail.com', 'Jacques', 'HOMME', 'WIRTH ', '0000000000', 332),
-(304, '2000-01-01', 'a.arendt@hotmail.fr', 'Annick', 'FEMME', 'ARENDT ', '0000000000', 333),
-(305, '2000-01-01', 'inconnu', 'Hamid', 'HOMME', 'OULMI', '000000000', 334),
-(306, '2000-01-01', 'inconnu', 'Pascale', 'FEMME', 'GODARD', '0000000000', 335),
-(307, '2000-01-01', 'michele.rousselot@orange.fr', 'Michele ', 'FEMME', 'ROUSSELOT', '0387631677', 336),
-(308, '2000-01-01', 'juliegey64@gmail.com', 'Julie', 'FEMME', 'GEY', '0000000000', 337),
-(309, '2000-01-01', 'inconnu', 'KADUOUDJA', 'FEMME', 'OULMI', '0000000000', 338),
-(310, '2000-01-01', 'abdelazizwac@hotmail.fr', 'abdelaziz', 'HOMME', 'KHALDOUNE', '0000000000', 339),
-(311, '2000-01-01', 'chouikanarjes@yahoo.fr', 'Abdelkader', 'HOMME', 'CHOUIKA', '0000000000', 340),
-(312, '2000-01-01', 'louvre.malroute@gmail.com', 'Louvre', 'FEMME', 'MALROUTE', '0000000000', 341),
-(313, '2000-01-01', 'clodriant@hotmail.com', 'Claudine', 'FEMME', 'DRIANT', '000000000', 342),
-(314, '2000-01-01', 'chouetteages57@yahoo.fr', 'Agès', 'FEMME', 'PERREN', '0661159489', 343),
-(315, '2000-01-01', 'inconnu', 'Albant', 'HOMME', 'GREGOLF', '0000000000', 344),
-(316, '2000-01-01', 'inconnu', 'LASZ', 'FEMME', 'NMOMA', '0000000000', 345),
-(317, '2000-01-01', 'myriam.alliot@numericable.fr', 'Myriam', 'FEMME', 'ALLIOT', '0000000000', 346),
-(318, '2000-01-01', 'hongtg@hotmail.com', 'Hong', 'HOMME', 'TANG ', '0770119094', 347),
-(319, '2022-01-01', 'cosmos.rose@hotmail.fr', ' Andrée ', 'FEMME', 'HOCQUEL', '0387517832', 348),
-(320, '2007-04-11', 'meryem.k5740@gmail.com', 'Meryem', 'FEMME', 'KOMBE', '0783963371', 349),
-(321, '2007-01-17', 'inconnu', 'NADJET', 'FEMME', 'BELMADANI', '0780686969', 350),
-(322, '2004-02-05', 'imranerezaig@gmail.com', 'Imrane', 'HOMME', 'REZAIG', '0646923450', 351),
-(323, '2007-04-09', 'ayoubenfrid57@gmail.com', 'GHITA', 'FEMME', 'BOUDABYA ', '0784970691', 352),
-(324, '2010-06-09', 'belarbimous57@gmail.com', 'Moustafa', 'HOMME', 'BELARBI', '0751223318', 353),
-(325, '2008-04-10', 'inconnu', 'Enzo', 'HOMME', 'NIMSGERN', 'Inconnu', 354),
-(326, '2008-10-27', 'inconnu', 'BELMIN', 'HOMME', 'MUJANOVIC', 'INCONNU', 355),
-(327, '2009-10-29', 'inconnu', 'RYAN', 'HOMME', 'RENAUDIN', 'INCONNU', 356),
-(328, '2007-08-05', 'samuelsohier57@gmail.com', 'Samuel', 'HOMME', 'SOHIER', '0604008741', 357),
-(329, '2005-12-30', 'inconnu', 'Amine', 'HOMME', 'LHIOUI', 'inconnu', 358),
-(330, '2005-01-07', 'khey57.ayoub@gmail.com', 'ayoub', 'HOMME', 'KHEY', '0767206635', 359),
-(331, '2009-08-18', 'inconnu', 'Jawid', 'HOMME', 'AFZALI', '0766150198', 360),
-(332, '2001-06-27', 'leabmdesign@gmail.com', 'Lea', 'FEMME', 'BLOCH', 'Inconnue', 361),
-(333, '1968-01-24', 'inconnue', 'Fatima', 'FEMME', 'BENAHMED', '0767840553', 362),
-(334, '1985-08-27', 'nicolas-pierson@outlook.com', 'Nicolas', 'HOMME', 'PIERSON', '0688266152', 363),
-(335, '1985-09-13', 'inconnue', 'Odile', 'FEMME', 'ABRIAL', 'Inconnue', 364),
-(336, '1965-04-13', 'inconnue', 'Marie', 'FEMME', 'GREVELDINGER', 'Inconnue', 365),
-(337, '1963-05-28', 'inconnue', 'Hohnet', 'HOMME', 'SARITAS', 'Inconnue', 366),
-(338, '1968-02-15', 'inconnue', 'Monique', 'FEMME', 'DEFFEZ', 'Inconnue', 367),
-(339, '1998-04-15', 'inconnue', 'Rihab', 'FEMME', 'ABDALBAGE', 'Inconnue', 368),
-(340, '1979-11-24', 'inconnue', 'Mathild', 'FEMME', 'ALRAHID', 'Inconnue', 369),
-(341, '1976-10-23', 'inconnue', 'Nedie', 'FEMME', 'LOUIZ', 'Inconnue', 370),
-(342, '1985-02-25', 'inconnu', 'Lionel', 'HOMME', 'DURIEZ', 'Inconnu', 371),
-(343, '2023-11-14', 'inconnue', 'Daniele', 'FEMME', 'VINCENT', 'Inconnu', 372),
-(344, '2023-12-30', 'inconnue', 'Philipe', 'HOMME', 'PEZZOTTA', 'Inconnue', 373),
-(345, '1986-06-09', 'inconnu', 'Boileau', 'HOMME', 'MJC', 'Inconnu', 374),
-(346, '1979-09-19', 'inconnu', 'Christophe', 'HOMME', 'ZYDKO', 'Inconnu', 375),
-(347, '2010-08-19', 'inconnu', 'Souad', 'FEMME', 'ABDALBAGE', 'Inconnu', 376);
-
--- --------------------------------------------------------
-
---
 -- Structure de la table `roles`
 --
 
-CREATE TABLE `roles` (
+CREATE TABLE IF NOT EXISTS `roles` (
   `id` bigint(20) NOT NULL,
   `name` varchar(20) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -1556,7 +1542,7 @@ INSERT INTO `roles` (`id`, `name`) VALUES
 -- Structure de la table `users`
 --
 
-CREATE TABLE `users` (
+CREATE TABLE IF NOT EXISTS `users` (
   `id` bigint(20) NOT NULL,
   `password` varchar(255) NOT NULL,
   `username` varchar(255) NOT NULL
@@ -1577,7 +1563,7 @@ INSERT INTO `users` (`id`, `password`, `username`) VALUES
 -- Structure de la table `user_roles`
 --
 
-CREATE TABLE `user_roles` (
+CREATE TABLE IF NOT EXISTS `user_roles` (
   `user_id` bigint(20) NOT NULL,
   `role_id` bigint(20) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -1590,6 +1576,7 @@ INSERT INTO `user_roles` (`user_id`, `role_id`) VALUES
 (2, 1),
 (2, 2),
 (3, 1),
+(4, 1),
 (4, 2);
 
 --
@@ -1599,17 +1586,21 @@ INSERT INTO `user_roles` (`user_id`, `role_id`) VALUES
 --
 -- Index pour la table `addresses`
 --
-ALTER TABLE `addresses`
-  ADD PRIMARY KEY (`id`);
+
+
+-- THE COMMENTED LINES ARE THE ONES THAT ARE CONFLICTING WITH AUTO-GENERATED SQL
+
+-- ALTER TABLE `addresses`
+--   ADD PRIMARY KEY (`id`);
 
 --
 -- Index pour la table `events`
 --
-ALTER TABLE `events`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `UniqueEvent` (`name`,`date`),
-  ADD KEY `FKquc7xx27bo60lupj2rf7e0hn2` (`address_id`),
-  ADD KEY `FKmp98picpga4uk631rvnn7t895` (`type_id`);
+-- ALTER TABLE `events`
+--   ADD PRIMARY KEY (`id`),
+--   ADD UNIQUE KEY `UniqueEvent` (`name`,`date`),
+--   ADD KEY `FKquc7xx27bo60lupj2rf7e0hn2` (`address_id`),
+--   ADD KEY `FKmp98picpga4uk631rvnn7t895` (`type_id`);
 
 --
 -- Index pour la table `events_contacts`
@@ -1635,36 +1626,36 @@ ALTER TABLE `events_participants`
 --
 -- Index pour la table `event_types`
 --
-ALTER TABLE `event_types`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `UK_60hr93n9u4csw3jstw87kwvyb` (`name`);
+-- ALTER TABLE `event_types`
+--   ADD PRIMARY KEY (`id`),
+--   ADD UNIQUE KEY `UK_60hr93n9u4csw3jstw87kwvyb` (`name`);
 
 --
 -- Index pour la table `persons`
 --
-ALTER TABLE `persons`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `UniquePerson` (`first_name`,`last_name`,`date_of_birth`),
-  ADD KEY `FKhpk0ck378u9nar5y4b4cwb8sd` (`address_id`);
+-- ALTER TABLE `persons`
+--   ADD PRIMARY KEY (`id`),
+--   ADD UNIQUE KEY `UniquePerson` (`first_name`,`last_name`,`date_of_birth`),
+--   ADD KEY `FKhpk0ck378u9nar5y4b4cwb8sd` (`address_id`);
 
 --
 -- Index pour la table `roles`
 --
-ALTER TABLE `roles`
-  ADD PRIMARY KEY (`id`);
+-- ALTER TABLE `roles`
+--   ADD PRIMARY KEY (`id`);
 
 --
 -- Index pour la table `users`
 --
-ALTER TABLE `users`
-  ADD PRIMARY KEY (`id`);
+-- ALTER TABLE `users`
+--   ADD PRIMARY KEY (`id`);
 
 --
 -- Index pour la table `user_roles`
 --
-ALTER TABLE `user_roles`
-  ADD PRIMARY KEY (`user_id`,`role_id`),
-  ADD KEY `FKh8ciramu9cc9q3qcqiv4ue8a6` (`role_id`);
+-- ALTER TABLE `user_roles`
+--   ADD PRIMARY KEY (`user_id`,`role_id`),
+--   ADD KEY `FKh8ciramu9cc9q3qcqiv4ue8a6` (`role_id`);
 
 --
 -- AUTO_INCREMENT pour les tables déchargées
@@ -1674,37 +1665,37 @@ ALTER TABLE `user_roles`
 -- AUTO_INCREMENT pour la table `addresses`
 --
 ALTER TABLE `addresses`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=377;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT pour la table `events`
 --
 ALTER TABLE `events`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=85;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT pour la table `event_types`
 --
 ALTER TABLE `event_types`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=77;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT pour la table `persons`
 --
 ALTER TABLE `persons`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=348;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT pour la table `roles`
 --
 ALTER TABLE `roles`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT pour la table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
 
 --
 -- Contraintes pour les tables déchargées
@@ -1713,45 +1704,68 @@ ALTER TABLE `users`
 --
 -- Contraintes pour la table `events`
 --
-ALTER TABLE `events`
-  ADD CONSTRAINT `FKmp98picpga4uk631rvnn7t895` FOREIGN KEY (`type_id`) REFERENCES `event_types` (`id`),
-  ADD CONSTRAINT `FKquc7xx27bo60lupj2rf7e0hn2` FOREIGN KEY (`address_id`) REFERENCES `addresses` (`id`);
+-- ALTER TABLE `events`
+--   ADD CONSTRAINT `FKmp98picpga4uk631rvnn7t895` FOREIGN KEY (`type_id`) REFERENCES `event_types` (`id`),
+--   ADD CONSTRAINT `FKquc7xx27bo60lupj2rf7e0hn2` FOREIGN KEY (`address_id`) REFERENCES `addresses` (`id`);
 
 --
 -- Contraintes pour la table `events_contacts`
 --
-ALTER TABLE `events_contacts`
-  ADD CONSTRAINT `FK7ra0h2oj4rgp6i9tygd5vtusg` FOREIGN KEY (`contacts_id`) REFERENCES `persons` (`id`),
-  ADD CONSTRAINT `FKdjusp6ppj34vohc87c5aeai5l` FOREIGN KEY (`event_id`) REFERENCES `events` (`id`);
+-- ALTER TABLE `events_contacts`
+--   ADD CONSTRAINT `FK7ra0h2oj4rgp6i9tygd5vtusg` FOREIGN KEY (`contacts_id`) REFERENCES `persons` (`id`),
+--   ADD CONSTRAINT `FKdjusp6ppj34vohc87c5aeai5l` FOREIGN KEY (`event_id`) REFERENCES `events` (`id`);
 
 --
 -- Contraintes pour la table `events_hosts`
 --
-ALTER TABLE `events_hosts`
-  ADD CONSTRAINT `FK1i43uj42tjixa8tms37safwbf` FOREIGN KEY (`hosts_id`) REFERENCES `persons` (`id`),
-  ADD CONSTRAINT `FK7ss1rg4ech5st67hognbnf6bp` FOREIGN KEY (`event_id`) REFERENCES `events` (`id`);
+-- ALTER TABLE `events_hosts`
+--   ADD CONSTRAINT `FK1i43uj42tjixa8tms37safwbf` FOREIGN KEY (`hosts_id`) REFERENCES `persons` (`id`),
+--   ADD CONSTRAINT `FK7ss1rg4ech5st67hognbnf6bp` FOREIGN KEY (`event_id`) REFERENCES `events` (`id`);
 
 --
 -- Contraintes pour la table `events_participants`
 --
-ALTER TABLE `events_participants`
-  ADD CONSTRAINT `FK35vivi0eufexku60chhfhw5ol` FOREIGN KEY (`event_id`) REFERENCES `events` (`id`),
-  ADD CONSTRAINT `FKqpm7g99wm1vl4bhnlcwwkjxo4` FOREIGN KEY (`participants_id`) REFERENCES `persons` (`id`);
+-- ALTER TABLE `events_participants`
+--   ADD CONSTRAINT `FK35vivi0eufexku60chhfhw5ol` FOREIGN KEY (`event_id`) REFERENCES `events` (`id`),
+--   ADD CONSTRAINT `FKqpm7g99wm1vl4bhnlcwwkjxo4` FOREIGN KEY (`participants_id`) REFERENCES `persons` (`id`);
 
 --
 -- Contraintes pour la table `persons`
 --
-ALTER TABLE `persons`
-  ADD CONSTRAINT `FKhpk0ck378u9nar5y4b4cwb8sd` FOREIGN KEY (`address_id`) REFERENCES `addresses` (`id`);
+-- ALTER TABLE `persons`
+--   ADD CONSTRAINT `FKhpk0ck378u9nar5y4b4cwb8sd` FOREIGN KEY (`address_id`) REFERENCES `addresses` (`id`);
 
 --
 -- Contraintes pour la table `user_roles`
 --
-ALTER TABLE `user_roles`
-  ADD CONSTRAINT `FKh8ciramu9cc9q3qcqiv4ue8a6` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`),
-  ADD CONSTRAINT `FKhfh9dx7w3ubf1co1vdev94g3f` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`);
-COMMIT;
+-- ALTER TABLE `user_roles`
+--   ADD CONSTRAINT `FKh8ciramu9cc9q3qcqiv4ue8a6` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`),
+--   ADD CONSTRAINT `FKhfh9dx7w3ubf1co1vdev94g3f` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`);
+-- COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+
+
+
+-- DELIMITER $$
+-- --
+-- -- Procédures
+-- --
+-- CREATE DEFINER=`web`@`%` PROCEDURE `SP_getParticipants` (IN `startDt` DATE, IN `endDt` DATE)   BEGIN
+-- SELECT et.name as type, GROUP_CONCAT(DISTINCT events.name) as evenements,
+--        events.date, p.last_name as nom, p.first_name as prenom,
+--        TIMESTAMPDIFF(YEAR, MIN(p.date_of_birth), SYSDATE()) as age,
+--        a.number as numero, a.street as rue, a.postal_code as code_postal, a.city as ville
+-- FROM events
+--          INNER JOIN event_types et on events.type_id = et.id
+--          INNER JOIN events_participants ep on events.id = ep.event_id
+--          INNER JOIN persons p on ep.participants_id = p.id
+--          INNER JOIN addresses a on p.address_id = a.id
+-- WHERE events.date BETWEEN `startDt` AND `endDt`
+-- GROUP BY events.name, p.first_name, p.last_name
+-- ORDER BY type, evenements, p.last_name, p.first_name;
+-- END$$
+--
+-- DELIMITER ;

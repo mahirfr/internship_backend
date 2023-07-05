@@ -34,13 +34,19 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final AuthEntryPointJwt unauthorizedHandler;
 
-    public WebSecurityConfig(UserDetailsServiceImpl userDetailsService, AuthEntryPointJwt unauthorizedHandler) {
+//    Change made here: authTokenFilter is now autowired because it was manually instantiated before
+    private final AuthTokenFilter authTokenFilter;
+
+    public WebSecurityConfig(UserDetailsServiceImpl userDetailsService,
+                             AuthEntryPointJwt unauthorizedHandler,
+                             AuthTokenFilter authTokenFilter) {
         this.userDetailsService = userDetailsService;
         this.unauthorizedHandler = unauthorizedHandler;
+        this.authTokenFilter = authTokenFilter;
     }
 
     public AuthTokenFilter authenticationJwtTokenFilter() {
-        return new AuthTokenFilter();
+        return this.authTokenFilter;
     }
 
     @Override

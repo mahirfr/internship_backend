@@ -27,10 +27,9 @@ public class Person {
     @Column(name = "date_of_birth", nullable = false, insertable = true)
     private LocalDate dateOfBirth;
 
-    @Column(unique = true)
     private String email;
 
-    @Column(unique = true)
+
     private String phone;
 
     @OneToOne(targetEntity = Address.class, cascade = CascadeType.ALL)
