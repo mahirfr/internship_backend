@@ -1,14 +1,14 @@
 package com.mdesign.data.api.model;
 
-import java.util.Optional;
-
 public interface MDesignQueryResult {
+    int getId();
     String getType();
     String getAddresses();
     String getEvents();
     String getDates();
     int getNbEvents();
     int getNbParticipants();
+    int getNbNewParticipants();
     int getNbMen();
     int getNbWomen();
     int getLowestAge();

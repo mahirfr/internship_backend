@@ -12,8 +12,12 @@ import java.util.Optional;
 @Data
 @Service
 public class EventService {
-    @Autowired
-    private EventRepository eventRepository;
+
+    private final EventRepository eventRepository;
+
+    public EventService(EventRepository eventRepository) {
+        this.eventRepository = eventRepository;
+    }
 
     public Optional<Event> getEvent(final Long id) {
         return eventRepository.findById(id);

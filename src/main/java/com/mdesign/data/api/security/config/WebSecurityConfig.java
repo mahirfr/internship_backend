@@ -29,6 +29,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     private String domain1;
     @Value("${com.mdesign.data.domain2}")
     private String domain2;
+    @Value("${com.mdesign.data.domain3}")
+    private String domain3;
+    @Value("${com.mdesign.data.domain4}")
+    private String domain4;
 
     private final UserDetailsServiceImpl userDetailsService;
 
@@ -69,7 +73,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http.csrf().disable().cors().configurationSource(request -> {
                     var cors = new CorsConfiguration();
-                    cors.setAllowedOrigins(List.of(domain1, domain2));
+                    cors.setAllowedOrigins(List.of(domain1, domain2, domain3, domain4));
                     cors.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
                     cors.setAllowedHeaders(List.of("*"));
                     return cors;

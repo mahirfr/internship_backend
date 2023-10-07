@@ -27,6 +27,11 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-tomcat</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-core</artifactId>
         </dependency>
@@ -69,6 +74,12 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.11.0</version>
+        </dependency>
+
     </dependencies>
     <profiles>
         <profile>
@@ -88,6 +99,7 @@
                 <db_data_init>true</db_data_init>
                 <db_init_mode>always</db_init_mode>
                 <jwt_secret>5555555555555555555555555555555555555555555iyfiii</jwt_secret>
+                <upload_folder>C:\\Users\\k\\Desktop\\MNS\\Stage_2\\upload_test_folder</upload_folder>
             </properties>
         </profile>
         <profile>
@@ -105,6 +117,7 @@
                 <db_data_init>false</db_data_init>
                 <db_init_mode>never</db_init_mode>
                 <jwt_secret></jwt_secret>
+                <upload_folder>/uploads</upload_folder>
             </properties>
         </profile>
     </profiles>

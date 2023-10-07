@@ -11,8 +11,12 @@ import java.util.Optional;
 @Data
 @Service
 public class PersonService {
-    @Autowired
-    private PersonRepository personRepository;
+
+    private final PersonRepository personRepository;
+
+    public PersonService(PersonRepository personRepository) {
+        this.personRepository = personRepository;
+    }
 
     public Optional<Person> getPerson(final Long id) {
         return personRepository.findById(id);

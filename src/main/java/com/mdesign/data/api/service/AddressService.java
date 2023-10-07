@@ -12,8 +12,12 @@ import java.util.Optional;
 @Data
 @Service
 public class AddressService {
-    @Autowired
-    private AddressRepository addressRepository;
+
+    private final AddressRepository addressRepository;
+
+    public AddressService(AddressRepository addressRepository) {
+        this.addressRepository = addressRepository;
+    }
 
     public Optional<Address> getAddress(final Long id) {
         return addressRepository.findById(id);

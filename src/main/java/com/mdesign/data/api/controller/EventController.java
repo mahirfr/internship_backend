@@ -5,17 +5,22 @@ import com.mdesign.data.api.model.Event;
 import com.mdesign.data.api.model.EventType;
 import com.mdesign.data.api.model.Person;
 import com.mdesign.data.api.service.EventService;
+import com.mdesign.data.api.service.FileService;
 import com.mdesign.data.api.service.PersonService;
+import org.apache.commons.io.FilenameUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api")
@@ -23,10 +28,14 @@ public class EventController {
 
     private final EventService eventService;
     private final PersonService personService;
+    private final FileService fileService;
 
-    public EventController(EventService eventService, PersonService personService) {
+    public EventController(EventService eventService,
+                           PersonService personService,
+                           FileService fileService) {
         this.eventService = eventService;
         this.personService = personService;
+        this.fileService = fileService;
     }
 
     @GetMapping("/events")
@@ -207,4 +216,31 @@ public class EventController {
 
         } else throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Could not find event with id " + id);
     }
+
+
+    @PostMapping("/events/{id}/upload")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> eventFilesUpload(@PathVariable final Long id,
+                                              @RequestParam("files") MultipartFile[] files) {
+
+        Optional<Event> event = eventService.getEvent(id);
+        System.out.println("I GET TO HERE");
+        if (event.isEmpty()) return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+        if (files.length > 0) {
+            for (MultipartFile file : files) {
+                    try {
+                        fileService.uploadToFileSystem(
+                                file,
+                                event.get().getDate().toString().replaceAll("-", "_"),
+                                file.getOriginalFilename());
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+            }
+            return ResponseEntity.status(HttpStatus.OK).body("Sauvegarde réussie");
+        }
+        return ResponseEntity.status(HttpStatus.OK).body("Sauvegarde échouée");
+    }
+
 }

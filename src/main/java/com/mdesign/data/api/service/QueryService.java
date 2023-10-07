@@ -5,7 +5,9 @@ import com.mdesign.data.api.model.GenderParticipationAtAddress;
 import com.mdesign.data.api.model.MDesignQueryResult;
 import com.mdesign.data.api.model.NbEventsParticipantsAtAddressInterface;
 import com.mdesign.data.api.repository.EventRepository;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
